@@ -1,4 +1,4 @@
-# self-stabilizing-uniform-reliable-broadcast
+# Self-stabilizing Uniform Reliable Broadcast (URB)
 
 ## Set up
 
