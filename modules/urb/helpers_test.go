@@ -19,11 +19,11 @@ func TestIsSubSet(t *testing.T) {
 }
 
 func TestMax(t *testing.T) {
-	assert.Assert(t, max(5, 3) == 5)
-	assert.Assert(t, max(-5, 2) == 2)
-	assert.Assert(t, max(0, 0) == 0)
-	assert.Assert(t, max(0, 5) == 5)
-	assert.Assert(t, max(-2, 0) == 0)
+	assert.Equal(t, max(5, 3), 5)
+	assert.Equal(t, max(-5, 2), 2)
+	assert.Equal(t, max(0, 0), 0)
+	assert.Equal(t, max(0, 5), 5)
+	assert.Equal(t, max(-2, 0), 0)
 }
 
 func TestContains(t *testing.T) {

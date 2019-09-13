@@ -34,7 +34,7 @@ func main() {
 	log.SetFlags(log.Lshortfile | log.Ldate | log.Ltime)
 	log.Printf("Instance %d starting\n", id)
 
-	// parse hosts and build P which is a slice of all node ids
+	// parse hosts and build P which is a essentially a slice of all node ids
 	hosts, _ := helpers.ParseHostsFile()
 	P := []int{}
 	for _, p := range hosts {
@@ -42,7 +42,7 @@ func main() {
 	}
 
 	// init module
-	urbModule := urb.UrbModule{ID: id, P: P}
+	urbModule := urb.Module{ID: id, P: P}
 
 	// init waitgroup to keep track of all goroutines
 	var wg sync.WaitGroup
@@ -51,7 +51,7 @@ func main() {
 
 	// launch urb module in a goroutine
 	wg.Add(1)
-	go func(module urb.UrbModule) {
+	go func(module urb.Module) {
 		defer wg.Done()
 		log.Printf("Starting URB module")
 		module.DoForever()

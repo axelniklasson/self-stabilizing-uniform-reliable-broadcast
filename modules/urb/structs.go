@@ -1,12 +1,17 @@
 package urb
 
-type UrbModule struct {
-	ID             int
-	P              []int
-	Seq            int
-	Buffer         Buffer
-	SeqMin         []int
-	BufferUnitSize int
+import "fmt"
+
+// Module models the URB algorithm in the paper
+type Module struct {
+	ID     int
+	P      []int
+	Seq    int
+	Buffer Buffer
+	// SeqMin         []int
+	// BufferUnitSize int
+	RxObsS []int
+	TxObsS []int
 }
 
 // MessageType indicates the type of message
@@ -21,6 +26,7 @@ const (
 	GOSSIP MessageType = 2
 )
 
+// Message models a message that can be broadcasted using the URB algorithm
 type Message struct {
 	Type       MessageType
 	SenderID   int
@@ -29,22 +35,30 @@ type Message struct {
 	Contents   []byte
 }
 
+// Identifier is a pair (ID, Seq) associating a message with the sender and its local sequence number
 type Identifier struct {
 	ID  int
 	Seq int
 }
 
+// Buffer holds a number of Records
 type Buffer struct {
 	Records []BufferRecord
 }
 
-func (b Buffer) Contains(id Identifier) *BufferRecord {
+// Get is a helper function that can be used to check membership for a BufferRecord in a Buffer. Returns nil if no record exists with id
+func (b Buffer) Get(id Identifier) *BufferRecord {
 	for _, r := range b.Records {
 		if r.Identifier == id {
 			return &r
 		}
 	}
 	return nil
+}
+
+// Add is a wrapper to make it cleaner to add records to the buffer
+func (b *Buffer) Add(br BufferRecord) {
+	b.Records = append(b.Records, br)
 }
 
 // BufferRecord models a record residing in the local buffer of a processor
@@ -57,8 +71,12 @@ type BufferRecord struct {
 	Delivered bool
 	// set that includes the identifiers of processors that have acknowledge the message msg
 	RecBy map[int]bool
-
 	// value of the HB failure detector
-	// TODO
 	PrevHB []int
+}
+
+func (br BufferRecord) String() string {
+	return fmt.Sprintf(
+		"BufferRecord - Msg: %v, ID: %d, Seq: %d, Delivered: %t, RecBy: %v, PrevHB: %v",
+		br.Msg, br.Identifier.ID, br.Identifier.Seq, br.Delivered, br.RecBy, br.PrevHB)
 }

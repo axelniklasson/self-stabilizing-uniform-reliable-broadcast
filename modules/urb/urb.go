@@ -2,113 +2,85 @@ package urb
 
 import (
 	"log"
-	"self-stabilizing-uniform-reliable-broadcast/modules/hbfd"
-	"self-stabilizing-uniform-reliable-broadcast/modules/thetafd"
 	"time"
+
+	"self-stabilizing-uniform-reliable-broadcast/modules/thetafd"
 )
 
-func (module UrbModule) recordMark(k int) int {
-	// TODO implement
-	return -1
+// bufferUnitSize is used to control the number of messages allowed to be in the buffer for a processor
+const bufferUnitSize = 10
+
+func (m *Module) obsolete(r BufferRecord) bool {
+	// return false if trusted is not subset of r.RecBy
+	for _, id := range thetafd.Trusted() {
+		if _, exists := r.RecBy[id]; !exists {
+			return false
+		}
+	}
+
+	return m.RxObsS[r.Identifier.ID]+1 == r.Identifier.Seq && r.Delivered
 }
 
-func (module UrbModule) update(m *Message, j int, s int, k int) {
-	// check if buffer has record with identifier id
-	id := Identifier{j, s}
+func (m *Module) maxSeq(k int) int {
+	max := -1
+	for _, record := range m.Buffer.Records {
+		if record.Identifier.ID == k && record.Identifier.Seq > max {
+			max = record.Identifier.Seq
+		}
+	}
 
-	r := module.Buffer.Contains(id)
-	if r != nil {
-		// buffer contains record, only update recBy to include i
+	return max
+}
+
+func (m *Module) minTxObsS() int {
+	trusted := thetafd.Trusted()
+	min := -1
+	for _, id := range trusted {
+		if min == -1 || m.TxObsS[id] < min {
+			min = m.TxObsS[id]
+		}
+	}
+	return min
+}
+
+func (m *Module) update(msg *Message, j int, s int, k int) {
+	if s <= m.RxObsS[j] {
+		return
+	}
+
+	id := Identifier{ID: j, Seq: s}
+	r := m.Buffer.Get(id)
+
+	// add record to buffer if new id and message is not nil
+	if r == nil && msg != nil {
+		recBy := map[int]bool{j: true, k: true}
+		prevHB := []int{}
+		for i := 0; i < len(m.P); i++ {
+			prevHB = append(prevHB, -1)
+		}
+
+		newRecord := BufferRecord{Msg: msg, Identifier: id, Delivered: false, RecBy: recBy, PrevHB: prevHB}
+		m.Buffer.Add(newRecord)
+	} else if r != nil {
+
 		r.RecBy[j] = true
 		r.RecBy[k] = true
-	} else {
-		// create and add record to buffer
-		r := BufferRecord{m, id, false, map[int]bool{j: true, k: true}, nil}
-		module.Buffer.Records = append(module.Buffer.Records, r)
 	}
 }
 
-func (module UrbModule) urbBroadcast(m *Message) {
+func (m *Module) urbBroadcast(msg *Message) {
 	// wait(seq − min{seqMin[k]}k∈trusted < bufferUnitSize);
-	module.Seq++
-	module.update(m, module.ID, module.Seq, module.ID)
+	m.Seq++
+	m.update(msg, m.ID, m.Seq, m.ID)
 }
 
-func (module UrbModule) urbDeliver(m *Message) {
+func (m *Module) urbDeliver(msg *Message) {
 	// TODO implement
 }
 
 // DoForever starts the algorithm and runs forever
-func (module UrbModule) DoForever() {
+func (m *Module) DoForever() {
 	for {
-		// line 13 - check if buffer contains stale information
-		flush := false
-		foundIdentifiers := map[Identifier]int{}
-		for _, record := range module.Buffer.Records {
-			// check if message is empty
-			if record.Msg == nil {
-				flush = true
-				break
-			} else {
-				if _, ok := foundIdentifiers[record.Identifier]; ok {
-					// same identifier used in multiple records
-					flush = true
-					break
-				}
-
-				foundIdentifiers[record.Identifier] = 1
-			}
-
-		}
-		// line 14 - flush buffer if records either have empty messages or same identifiers
-		if flush {
-			module.Buffer = Buffer{}
-		}
-
-		// line 15 - remove obsolete messages
-		records := []BufferRecord{}
-		for _, record := range module.Buffer.Records {
-			j := record.Identifier.ID
-			s := record.Identifier.Seq
-			if contains(module.P, j) && module.recordMark(j) <= s+module.BufferUnitSize {
-				records = append(records, record)
-			}
-		}
-		module.Buffer.Records = records
-
-		// lines 16-19 - process records that are ready to be delivered
-		for _, record := range module.Buffer.Records {
-			trusted := thetafd.Trusted()
-			if isSubset(trusted, record.RecBy) && !record.Delivered {
-				module.urbDeliver(record.Msg)
-			}
-
-			record.Delivered = record.Delivered || isSubset(trusted, record.RecBy)
-			u := hbfd.HB()
-			for _, pK := range module.P {
-				if _, exists := record.RecBy[pK]; !exists {
-					if record.PrevHB[pK] != u[pK] {
-						record.PrevHB = u
-						// TODO sendMSG(m,j,s)topk;
-					}
-				}
-			}
-		}
-
-		// lines 20-21 - send gossip messages to other processors
-		for _, pK := range module.P {
-			// find highest sequence number in buffer for id = pK
-			s := -1
-			for _, record := range module.Buffer.Records {
-				if record.Identifier.ID == pK && record.Identifier.Seq > s {
-					s = record.Identifier.Seq
-				}
-			}
-
-			// send GOSSIP(max{s : (•, id = k, seq = s, •) ∈ buffer }, recordMark(k)) to pk
-			// TODO send GOSSIP message to pK
-		}
-
 		time.Sleep(time.Second * 1)
 		log.Printf("One iteration of doForever() done")
 	}
