@@ -1,4 +1,4 @@
-package urb
+package modules
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 	"gotest.tools/assert"
 )
 
-func initModule() Module {
+func initModule() UrbModule {
 	P := []int{0, 1, 2, 3, 4, 5}
 	seq := 0
 	buffer := Buffer{}
@@ -16,7 +16,7 @@ func initModule() Module {
 		rxObsS = append(rxObsS, -1)
 		txObsS = append(rxObsS, -1)
 	}
-	return Module{ID: 0, P: P, Seq: seq, Buffer: buffer, RxObsS: rxObsS, TxObsS: txObsS}
+	return UrbModule{ID: 0, P: P, Seq: seq, Buffer: buffer, RxObsS: rxObsS, TxObsS: txObsS}
 }
 
 func TestObsolete(t *testing.T) {

@@ -1,17 +1,18 @@
-package urb
+package modules
 
-import "fmt"
+import (
+	"fmt"
+)
 
-// Module models the URB algorithm in the paper
-type Module struct {
-	ID     int
-	P      []int
-	Seq    int
-	Buffer Buffer
-	// SeqMin         []int
-	// BufferUnitSize int
-	RxObsS []int
-	TxObsS []int
+// UrbModule models the URB algorithm in the paper
+type UrbModule struct {
+	ID       int
+	P        []int
+	Resolver *Resolver
+	Seq      int
+	Buffer   Buffer
+	RxObsS   []int
+	TxObsS   []int
 }
 
 // MessageType indicates the type of message

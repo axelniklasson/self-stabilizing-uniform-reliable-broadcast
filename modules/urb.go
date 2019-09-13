@@ -1,18 +1,17 @@
-package urb
+package modules
 
 import (
 	"log"
+	"self-stabilizing-uniform-reliable-broadcast/constants"
 	"time"
-
-	"self-stabilizing-uniform-reliable-broadcast/modules/thetafd"
 )
 
 // bufferUnitSize is used to control the number of messages allowed to be in the buffer for a processor
 const bufferUnitSize = 10
 
-func (m *Module) obsolete(r BufferRecord) bool {
+func (m *UrbModule) obsolete(r BufferRecord) bool {
 	// return false if trusted is not subset of r.RecBy
-	for _, id := range thetafd.Trusted() {
+	for _, id := range m.Resolver.trusted() {
 		if _, exists := r.RecBy[id]; !exists {
 			return false
 		}
@@ -21,7 +20,7 @@ func (m *Module) obsolete(r BufferRecord) bool {
 	return m.RxObsS[r.Identifier.ID]+1 == r.Identifier.Seq && r.Delivered
 }
 
-func (m *Module) maxSeq(k int) int {
+func (m *UrbModule) maxSeq(k int) int {
 	max := -1
 	for _, record := range m.Buffer.Records {
 		if record.Identifier.ID == k && record.Identifier.Seq > max {
@@ -32,8 +31,8 @@ func (m *Module) maxSeq(k int) int {
 	return max
 }
 
-func (m *Module) minTxObsS() int {
-	trusted := thetafd.Trusted()
+func (m *UrbModule) minTxObsS() int {
+	trusted := m.Resolver.trusted()
 	min := -1
 	for _, id := range trusted {
 		if min == -1 || m.TxObsS[id] < min {
@@ -43,7 +42,7 @@ func (m *Module) minTxObsS() int {
 	return min
 }
 
-func (m *Module) update(msg *Message, j int, s int, k int) {
+func (m *UrbModule) update(msg *Message, j int, s int, k int) {
 	if s <= m.RxObsS[j] {
 		return
 	}
@@ -68,20 +67,26 @@ func (m *Module) update(msg *Message, j int, s int, k int) {
 	}
 }
 
-func (m *Module) urbBroadcast(msg *Message) {
-	// wait(seq − min{seqMin[k]}k∈trusted < bufferUnitSize);
-	m.Seq++
-	m.update(msg, m.ID, m.Seq, m.ID)
+// TODO figure out if this really should spawn a goroutine or rather be wrapped entirely in a goroutine
+func (m *UrbModule) urbBroadcast(msg *Message) {
+	go func(m *UrbModule) {
+		for m.Seq < m.minTxObsS()+bufferUnitSize {
+		}
+
+		m.Seq++
+		m.update(msg, m.ID, m.Seq, m.ID)
+	}(m)
 }
 
-func (m *Module) urbDeliver(msg *Message) {
-	// TODO implement
+func (m *UrbModule) urbDeliver(msg *Message) {
+	// TODO something more sofisticated with msg than just logging it
+	log.Printf("Delivering message %v\n", msg)
 }
 
 // DoForever starts the algorithm and runs forever
-func (m *Module) DoForever() {
+func (m *UrbModule) DoForever() {
 	for {
-		time.Sleep(time.Second * 1)
+		time.Sleep(time.Second * constants.MODULE_RUN_SLEEP_SECONDS)
 		log.Printf("One iteration of doForever() done")
 	}
 }
