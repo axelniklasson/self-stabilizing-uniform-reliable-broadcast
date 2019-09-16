@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 	"self-stabilizing-uniform-reliable-broadcast/helpers"
-	"self-stabilizing-uniform-reliable-broadcast/modules/urb"
+	"self-stabilizing-uniform-reliable-broadcast/modules"
 	"strconv"
 	"sync"
 )
@@ -34,24 +34,52 @@ func main() {
 	log.SetFlags(log.Lshortfile | log.Ldate | log.Ltime)
 	log.Printf("Instance %d starting\n", id)
 
-	// parse hosts and build P which is a slice of all node ids
+	// parse hosts and build P which is a essentially a slice of all node ids
 	hosts, _ := helpers.ParseHostsFile()
 	P := []int{}
+	zeroedSlice := []int{}
 	for _, p := range hosts {
 		P = append(P, p.ID)
+		zeroedSlice = append(zeroedSlice, 0)
 	}
 
+	resolver := modules.Resolver{}
+
 	// init module
-	urbModule := urb.UrbModule{ID: id, P: P}
+	urbModule := modules.UrbModule{ID: id, P: P, Resolver: &resolver, Seq: 0, Buffer: modules.Buffer{}, RxObsS: []int{}, TxObsS: []int{}}
+	hbfdModule := modules.HbfdModule{ID: id, P: P, Resolver: &resolver, Hb: zeroedSlice}
+	thetafdModule := modules.ThetafdModule{ID: id, P: P, Resolver: &resolver, Vector: zeroedSlice}
+
+	// init resolver and attach modules
+	resolver.Modules = make(map[modules.ModuleType]interface{})
+	resolver.Modules[modules.URB] = urbModule
+	resolver.Modules[modules.HBFD] = hbfdModule
+	resolver.Modules[modules.THETAFD] = thetafdModule
 
 	// init waitgroup to keep track of all goroutines
 	var wg sync.WaitGroup
 
 	// setup communication
 
-	// launch urb module in a goroutine
+	// launch hbfd module
 	wg.Add(1)
-	go func(module urb.UrbModule) {
+	go func(module modules.HbfdModule) {
+		defer wg.Done()
+		log.Printf("Starting HBFD module")
+		module.DoForever()
+	}(hbfdModule)
+
+	// launch thetafd module
+	wg.Add(1)
+	go func(module modules.ThetafdModule) {
+		defer wg.Done()
+		log.Printf("Starting THETAFD module")
+		module.DoForever()
+	}(thetafdModule)
+
+	// launch urb module
+	wg.Add(1)
+	go func(module modules.UrbModule) {
 		defer wg.Done()
 		log.Printf("Starting URB module")
 		module.DoForever()
