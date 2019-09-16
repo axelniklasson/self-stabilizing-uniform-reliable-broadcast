@@ -3,6 +3,7 @@
 ## Set up
 First, make sure that [Go](https://golang.org/doc/install) is installed. This project was developed for version `1.13`, so that is the recommended version to use. Then, install [dep](https://golang.github.io/dep/docs/installation.html).
 
+When that is done, run the following commands.
 ```
 cd $GOPATH/src/github.com && git clone https://github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast
 cd self-stabilizing-uniform-reliable-broadcast
