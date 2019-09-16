@@ -1,44 +1,68 @@
 package modules
 
 import (
+	"reflect"
 	"testing"
 
 	"gotest.tools/assert"
 )
 
-func initModule() UrbModule {
+type MockResolver struct {
+	Modules    map[ModuleType]interface{}
+	TrustedRet []int
+	HbRet      []int
+}
+
+func (r *MockResolver) hb() []int      { return r.HbRet }
+func (r *MockResolver) trusted() []int { return r.TrustedRet }
+
+func bootstrap() (*UrbModule, *MockResolver) {
 	P := []int{0, 1, 2, 3, 4, 5}
 	seq := 0
 	buffer := Buffer{}
 	rxObsS := []int{}
 	txObsS := []int{}
+	zeroedSlice := []int{}
 	for i := 0; i < len(P); i++ {
 		rxObsS = append(rxObsS, -1)
 		txObsS = append(rxObsS, -1)
 	}
-	return UrbModule{ID: 0, P: P, Seq: seq, Buffer: buffer, RxObsS: rxObsS, TxObsS: txObsS}
+	r := MockResolver{Modules: make(map[ModuleType]interface{})}
+	urbModule := UrbModule{ID: 0, P: P, Resolver: &r, Seq: seq, Buffer: buffer, RxObsS: rxObsS, TxObsS: txObsS}
+	thetaModule := ThetafdModule{ID: 0, P: P, Resolver: &r, Vector: zeroedSlice}
+
+	r.Modules[URB] = urbModule
+	r.Modules[THETAFD] = thetaModule
+
+	return &urbModule, &r
 }
 
 func TestObsolete(t *testing.T) {
-	mod := initModule()
-	mod.RxObsS = []int{0, 5, 0, 0, 0, 0}
-	// r := BufferRecord{Identifier: Identifier{ID: 1, Seq: 0}, Delivered: false}
-	// r2 := BufferRecord{Identifier: Identifier{ID: 1, Seq: 1}, Delivered: true}
+	mod, resolver := bootstrap()
+	mod.RxObsS = []int{0, 1, 0, 0, 0, 0}
 
-	// TODO figure out how to test that it returns record is obsolete based on trusted not being subset of recBy
+	// construct record that is considered to be obsolete
+	resolver.TrustedRet = []int{0, 1, 2}
+	r := BufferRecord{Identifier: Identifier{ID: 1, Seq: 2}, Delivered: true, RecBy: map[int]bool{0: true, 1: true, 2: true, 3: true}}
+	assert.Assert(t, mod.obsolete(r))
 
-	// return false if record is not delivered and vice verse
-	assert.Assert(t, !mod.obsolete(BufferRecord{Delivered: false}))
+	// testing delivered == false returns not obsolete
+	r.Delivered = false
+	assert.Assert(t, !mod.obsolete(r))
+	r.Delivered = true
 
-	// returns false if seqnum != last highest obsolete number for that node + 1
-	assert.Assert(t, !mod.obsolete(BufferRecord{Delivered: true, Identifier: Identifier{ID: 1, Seq: 8}}))
+	// testing that trusted not subset of recBy returns not obsolete
+	r.RecBy = map[int]bool{0: true, 1: true}
+	assert.Assert(t, !mod.obsolete(r))
+	r.RecBy = map[int]bool{0: true, 1: true, 2: true, 3: true}
 
-	// make sure it returns true when applicable
-	// TODO
+	// testing that r.seqnum != last highest obsolete seqnum for r.id returns not obsolete
+	r.Identifier.Seq = 5 // 5 != 1 + 1
+	assert.Assert(t, !mod.obsolete(r))
 }
 
 func TestMaxSeq(t *testing.T) {
-	mod := initModule()
+	mod, _ := bootstrap()
 	k := 1
 
 	// no record with id = k in buffer since it's empty, should return -1
@@ -55,14 +79,16 @@ func TestMaxSeq(t *testing.T) {
 }
 
 func TestMinTxObsS(t *testing.T) {
-	mod := initModule()
+	mod, resolver := bootstrap()
 	mod.TxObsS = []int{1, 2, 5, 10, 0, 50}
+	resolver.TrustedRet = []int{1, 3, 5}
 
-	// TODO figure out a way to mock thetafd.Trusted() so it returns [1,3,5]
+	// should return 2, since mod.TxObsS[1] is smallest value for x, x part of resolver.TrustedRet
+	assert.Equal(t, mod.minTxObsS(), 2)
 }
 
 func TestUpdate(t *testing.T) {
-	mod := initModule()
+	mod, _ := bootstrap()
 
 	// populate buffer with a few records
 	mod.Buffer.Add(BufferRecord{Identifier: Identifier{ID: 1, Seq: 0}, RecBy: map[int]bool{0: true, 1: true}})
@@ -76,6 +102,12 @@ func TestUpdate(t *testing.T) {
 	// updating with proper message with new identifier should add to buffer
 	mod.update(&Message{Contents: []byte("asd")}, 3, 0, 3)
 	assert.Equal(t, len(mod.Buffer.Records), 4)
+
+	// trying to update with a message whose identifier already exists should simply add j and k to recBy
+	mod.update(&Message{Contents: []byte("asd")}, 1, 0, 5)
+	m := mod.Buffer.Get(Identifier{ID: 1, Seq: 0}).RecBy
+	m2 := map[int]bool{0: true, 1: true, 5: true}
+	assert.Assert(t, reflect.DeepEqual(m, m2))
 }
 
 func TestUrbBroadcast(t *testing.T) {

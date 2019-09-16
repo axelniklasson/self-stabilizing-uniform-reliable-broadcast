@@ -10,20 +10,8 @@ import (
 type ThetafdModule struct {
 	ID       int
 	P        []int
-	Resolver *Resolver
+	Resolver IResolver
 	Vector   []int
-}
-
-// trusted is an interface function that other modules can use to get the ids of trusted processors at a given time
-func (m *ThetafdModule) trusted() []int {
-	trusted := []int{}
-	for idx, x := range m.Vector {
-		if x < constants.THETAFD_W {
-			trusted = append(trusted, idx)
-		}
-	}
-
-	return trusted
 }
 
 // DoForever starts the algorithm and runs forever

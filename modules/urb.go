@@ -9,6 +9,29 @@ import (
 // bufferUnitSize is used to control the number of messages allowed to be in the buffer for a processor
 const bufferUnitSize = 10
 
+// UrbModule models the URB algorithm in the paper
+type UrbModule struct {
+	ID       int
+	P        []int
+	Resolver IResolver
+	Seq      int
+	Buffer   Buffer
+	RxObsS   []int
+	TxObsS   []int
+}
+
+// MessageType indicates the type of message
+type MessageType int
+
+const (
+	// MSG represents a broadcasted message
+	MSG MessageType = 0
+	// MSGack represents an acknowledgement of a broadcasted message
+	MSGack MessageType = 1
+	// GOSSIP represents messages used by processors to update each other
+	GOSSIP MessageType = 2
+)
+
 func (m *UrbModule) obsolete(r BufferRecord) bool {
 	// return false if trusted is not subset of r.RecBy
 	for _, id := range m.Resolver.trusted() {
@@ -61,7 +84,6 @@ func (m *UrbModule) update(msg *Message, j int, s int, k int) {
 		newRecord := BufferRecord{Msg: msg, Identifier: id, Delivered: false, RecBy: recBy, PrevHB: prevHB}
 		m.Buffer.Add(newRecord)
 	} else if r != nil {
-
 		r.RecBy[j] = true
 		r.RecBy[k] = true
 	}

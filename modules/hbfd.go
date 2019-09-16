@@ -14,11 +14,6 @@ type HbfdModule struct {
 	Hb       []int
 }
 
-// hb is an interface function that other modules can call to get the current hb value for other processors
-func (m *HbfdModule) hb() []int {
-	return m.Hb
-}
-
 // DoForever starts the algorithm and runs forever
 func (m *HbfdModule) DoForever() {
 	for {
