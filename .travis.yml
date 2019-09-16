@@ -6,6 +6,6 @@ before_script: go get -u golang.org/x/lint/golint
 jobs:
   include:
     - stage: lint
-      script: go list ./... | grep -v /vendor/ | xargs -n 1 golint
+      script: go list ./... | xargs -n 1 golint -set_exit_status
     - stage: unit tests
       script: go test -v ./...
