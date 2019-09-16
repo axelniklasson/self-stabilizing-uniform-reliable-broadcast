@@ -2,7 +2,7 @@ language: go
 
 go:
 - "1.13"
-script: 
+before_script: go get -u golang.org/x/lint/golint
 jobs:
   include:
     - stage: lint
