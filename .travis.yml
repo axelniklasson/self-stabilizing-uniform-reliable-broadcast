@@ -1,0 +1,11 @@
+language: go
+
+go:
+- 1.13
+script: 
+jobs:
+  include:
+    - stage: lint
+      script: go list ./... | grep -v /vendor/ | xargs -n 1 golint
+    - stage: unit tests
+      script: go test -v ./...
