@@ -31,7 +31,7 @@ func main() {
 	id := getID()
 
 	// setup logging
-	log.SetPrefix(fmt.Sprintf("[Node %d]: "))
+	log.SetPrefix(fmt.Sprintf("[Node %d]: ", id))
 	log.SetFlags(log.Lshortfile | log.Ldate | log.Ltime)
 	log.Printf("Instance %d starting\n", id)
 

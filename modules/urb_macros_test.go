@@ -58,7 +58,7 @@ func TestObsolete(t *testing.T) {
 
 	// testing that r.seqnum != last highest obsolete seqnum for r.id returns not obsolete
 	r.Identifier.Seq = 5 // 5 != 1 + 1
-	assert.Assert(t, mod.obsolete(r))
+	assert.Assert(t, !mod.obsolete(r))
 }
 
 func TestMaxSeq(t *testing.T) {
