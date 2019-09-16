@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"self-stabilizing-uniform-reliable-broadcast/helpers"
-	"self-stabilizing-uniform-reliable-broadcast/modules"
 	"strconv"
 	"sync"
+
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/helpers"
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/modules"
 )
 
 func getNodeIDs() []int {

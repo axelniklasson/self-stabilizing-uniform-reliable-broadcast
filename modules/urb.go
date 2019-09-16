@@ -2,8 +2,9 @@ package modules
 
 import (
 	"log"
-	"self-stabilizing-uniform-reliable-broadcast/constants"
 	"time"
+
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/constants"
 )
 
 // bufferUnitSize is used to control the number of messages allowed to be in the buffer for a processor
@@ -108,7 +109,7 @@ func (m *UrbModule) urbDeliver(msg *Message) {
 // DoForever starts the algorithm and runs forever
 func (m *UrbModule) DoForever() {
 	for {
-		time.Sleep(time.Second * constants.MODULE_RUN_SLEEP_SECONDS)
+		time.Sleep(time.Second * constants.ModuleRunSleepSeconds)
 		log.Printf("One iteration of doForever() done")
 	}
 }

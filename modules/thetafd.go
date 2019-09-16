@@ -2,8 +2,9 @@ package modules
 
 import (
 	"log"
-	"self-stabilizing-uniform-reliable-broadcast/constants"
 	"time"
+
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/constants"
 )
 
 // ThetafdModule models a theta failure detector
@@ -12,6 +13,18 @@ type ThetafdModule struct {
 	P        []int
 	Resolver IResolver
 	Vector   []int
+}
+
+// Trusted returns the set of processor IDs that are below the threshold ThetafdW
+func (m *ThetafdModule) Trusted() []int {
+	trusted := []int{}
+	for idx, x := range m.Vector {
+		if x < constants.ThetafdW {
+			trusted = append(trusted, idx)
+		}
+	}
+
+	return trusted
 }
 
 // DoForever starts the algorithm and runs forever
@@ -23,7 +36,7 @@ func (m *ThetafdModule) DoForever() {
 			}
 		}
 
-		time.Sleep(time.Second * constants.MODULE_RUN_SLEEP_SECONDS)
+		time.Sleep(time.Second * constants.ModuleRunSleepSeconds)
 		log.Printf("One iteration of doForever() done")
 	}
 }

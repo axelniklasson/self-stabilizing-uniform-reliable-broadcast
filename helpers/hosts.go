@@ -5,16 +5,17 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"self-stabilizing-uniform-reliable-broadcast/constants"
-	"self-stabilizing-uniform-reliable-broadcast/models"
 	"strconv"
 	"strings"
+
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/constants"
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/models"
 )
 
 // ParseHostsFile parses a host file at the given path and returns a slice of corresponding processors
 func ParseHostsFile() ([]models.Processor, error) {
 	// parse file and exit if error
-	file, err := os.Open(constants.HOSTS_FILE_PATH)
+	file, err := os.Open(constants.HostsFilePath)
 	if err != nil {
 		return nil, err
 	}
