@@ -2,6 +2,7 @@ package models
 
 import "fmt"
 
+// Processor represents a server/node in the network
 type Processor struct {
 	ID        int
 	Hostname  string
