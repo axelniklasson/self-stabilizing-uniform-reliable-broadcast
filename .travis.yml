@@ -1,0 +1,9 @@
+language: go
+
+go:
+- "1.13"
+before_script: go get -u golang.org/x/lint/golint
+script:
+  - go vet ./...
+  - go list ./... | xargs -n 1 golint -set_exit_status
+  - go test -v ./...

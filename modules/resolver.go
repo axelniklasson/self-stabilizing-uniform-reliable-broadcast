@@ -1,7 +1,5 @@
 package modules
 
-import "self-stabilizing-uniform-reliable-broadcast/constants"
-
 // ModuleType indicates the type of module
 type ModuleType int
 
@@ -28,17 +26,10 @@ type Resolver struct {
 
 func (r *Resolver) hb() []int {
 	m := r.Modules[HBFD].(HbfdModule)
-	return m.Hb
+	return m.HB()
 }
 
 func (r *Resolver) trusted() []int {
 	m := r.Modules[THETAFD].(ThetafdModule)
-	trusted := []int{}
-	for idx, x := range m.Vector {
-		if x < constants.THETAFD_W {
-			trusted = append(trusted, idx)
-		}
-	}
-
-	return trusted
+	return m.Trusted()
 }

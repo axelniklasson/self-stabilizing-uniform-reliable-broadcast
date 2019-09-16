@@ -2,8 +2,9 @@ package modules
 
 import (
 	"log"
-	"self-stabilizing-uniform-reliable-broadcast/constants"
 	"time"
+
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/constants"
 )
 
 // HbfdModule models a HB failure detector
@@ -12,6 +13,11 @@ type HbfdModule struct {
 	P        []int
 	Resolver *Resolver
 	Hb       []int
+}
+
+// HB returns the current value of the hb failure detector
+func (m *HbfdModule) HB() []int {
+	return m.Hb
 }
 
 // DoForever starts the algorithm and runs forever
@@ -23,7 +29,7 @@ func (m *HbfdModule) DoForever() {
 			}
 		}
 
-		time.Sleep(time.Second * constants.MODULE_RUN_SLEEP_SECONDS)
+		time.Sleep(time.Second * constants.ModuleRunSleepSeconds)
 		log.Printf("One iteration of doForever() done")
 	}
 }
