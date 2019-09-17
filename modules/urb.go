@@ -1,7 +1,6 @@
 package modules
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -207,8 +206,6 @@ func (m *UrbModule) checkTransmitWindow() {
 			s2[r.Identifier.Seq] = true
 		}
 	}
-
-	fmt.Println(s, s2, isSubset(s, s2))
 
 	// check if should allow this node to send bufferUnitSize messages without considering receivers
 	if !(mS <= m.Seq && m.Seq <= mS+bufferUnitSize && isSubset(s, s2)) {
