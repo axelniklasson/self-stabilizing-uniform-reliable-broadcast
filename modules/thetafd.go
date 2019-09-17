@@ -12,7 +12,15 @@ type ThetafdModule struct {
 	ID       int
 	P        []int
 	Resolver IResolver
-	Vector   []int
+
+	Vector []int
+}
+
+// Init initializes the thetafd module
+func (m *ThetafdModule) Init() {
+	for i := 0; i < len(m.P); i++ {
+		m.Vector = append(m.Vector, 0)
+	}
 }
 
 // Trusted returns the set of processor IDs that are below the threshold ThetafdW

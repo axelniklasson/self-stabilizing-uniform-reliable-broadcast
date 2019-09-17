@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -15,10 +16,24 @@ type UrbModule struct {
 	ID       int
 	P        []int
 	Resolver IResolver
-	Seq      int
-	Buffer   Buffer
-	RxObsS   []int
-	TxObsS   []int
+
+	Seq    int
+	Buffer *Buffer
+	RxObsS []int
+	TxObsS []int
+}
+
+// Init initializes the urb module
+func (m *UrbModule) Init() {
+	m.Seq = 0
+	m.Buffer = &Buffer{Records: []*BufferRecord{}}
+	m.RxObsS = []int{}
+	m.TxObsS = []int{}
+
+	for i := 0; i < len(m.P); i++ {
+		m.RxObsS = append(m.RxObsS, -1)
+		m.TxObsS = append(m.TxObsS, -1)
+	}
 }
 
 // MessageType indicates the type of message
@@ -36,7 +51,7 @@ const (
 // obsolete is used to determine what records in the buffer are considered to be obsolete
 // a record r is obsolete if it is delivered, its seqnum is the next in line to be obsolete and
 // all trusted processors have acked the record
-func (m *UrbModule) obsolete(r BufferRecord) bool {
+func (m *UrbModule) obsolete(r *BufferRecord) bool {
 	// return false if trusted is not subset of r.RecBy
 	for _, id := range m.Resolver.trusted() {
 		if _, exists := r.RecBy[id]; !exists {
@@ -91,7 +106,7 @@ func (m *UrbModule) update(msg *Message, j int, s int, k int) {
 		}
 
 		newRecord := BufferRecord{Msg: msg, Identifier: id, Delivered: false, RecBy: recBy, PrevHB: prevHB}
-		m.Buffer.Add(newRecord)
+		m.Buffer.Add(&newRecord)
 	} else if r != nil {
 		r.RecBy[j] = true
 		r.RecBy[k] = true
@@ -171,11 +186,11 @@ func (m *UrbModule) flushBufferIfStaleInfo() {
 	}
 
 	if flush {
-		m.Buffer.Records = []BufferRecord{}
+		m.Buffer.Records = []*BufferRecord{}
 	}
 }
 
-// checkTransmitWindow checks for transient fault (not all messages seqnums are between mS + 1  and seq)
+// checkTransmitWindow checks for transient fault (not all messages seqnums are between mS+1 and seq) and
 // recovers through allowing this processor to send bufferUnitSize messages without considering receiving end
 func (m *UrbModule) checkTransmitWindow() {
 	mS := m.minTxObsS()
@@ -193,7 +208,9 @@ func (m *UrbModule) checkTransmitWindow() {
 		}
 	}
 
-	// check if should allow this node to send bufferUnitSize messages without considering receiver
+	fmt.Println(s, s2, isSubset(s, s2))
+
+	// check if should allow this node to send bufferUnitSize messages without considering receivers
 	if !(mS <= m.Seq && m.Seq <= mS+bufferUnitSize && isSubset(s, s2)) {
 		for idx := range m.TxObsS {
 			m.TxObsS[idx] = m.Seq
@@ -223,21 +240,23 @@ func (m *UrbModule) updateReceiverCounters() {
 
 // trimBuffer makes sure buffer only contains sent messages that are not acked by all trusted or non-obsolete messages
 func (m *UrbModule) trimBuffer() {
-	oldBuffer := m.Buffer
-	m.Buffer = Buffer{Records: []BufferRecord{}}
-	for _, r := range oldBuffer.Records {
+	newBuffer := Buffer{Records: []*BufferRecord{}}
+
+	for _, r := range m.Buffer.Records {
 		if r.Identifier.ID == m.ID {
 			if m.minTxObsS() < r.Identifier.Seq {
-				m.Buffer.Add(r)
+				newBuffer.Add(r)
 			}
 		} else {
 			k := r.Identifier.ID
 			s := r.Identifier.Seq
 			if contains(m.P, k) && m.RxObsS[k] < s && m.maxSeq(k)-bufferUnitSize <= s {
-				m.Buffer.Add(r)
+				newBuffer.Add(r)
 			}
 		}
 	}
+
+	m.Buffer = &newBuffer
 }
 
 // processMessages delivers messages when acks from all trusted processors are present before sampling hb fd (used for re-transmission)
@@ -274,8 +293,9 @@ func (m *UrbModule) gossip() {
 func (m *UrbModule) hasObsoleteRecord() *BufferRecord {
 	for _, r := range m.Buffer.Records {
 		if m.obsolete(r) {
-			return &r
+			return r
 		}
 	}
+
 	return nil
 }

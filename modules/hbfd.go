@@ -12,7 +12,15 @@ type HbfdModule struct {
 	ID       int
 	P        []int
 	Resolver IResolver
-	Hb       []int
+
+	Hb []int
+}
+
+// Init initializes the hbfd module
+func (m *HbfdModule) Init() {
+	for i := 0; i < len(m.P); i++ {
+		m.Hb = append(m.Hb, 0)
+	}
 }
 
 // HB returns the current value of the hb failure detector
