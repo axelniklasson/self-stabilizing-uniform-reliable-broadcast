@@ -66,7 +66,6 @@ func main() {
 	wg.Add(1)
 	go func(module modules.HbfdModule) {
 		defer wg.Done()
-		log.Printf("Starting HBFD module")
 		module.DoForever()
 	}(hbfdModule)
 
@@ -74,7 +73,6 @@ func main() {
 	wg.Add(1)
 	go func(module modules.ThetafdModule) {
 		defer wg.Done()
-		log.Printf("Starting THETAFD module")
 		module.DoForever()
 	}(thetafdModule)
 
@@ -82,7 +80,6 @@ func main() {
 	wg.Add(1)
 	go func(module modules.UrbModule) {
 		defer wg.Done()
-		log.Printf("Starting URB module")
 		module.DoForever()
 	}(urbModule)
 

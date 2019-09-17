@@ -9,6 +9,14 @@ func isSubset(s, s2 map[int]bool) bool {
 	return true
 }
 
+func listToMap(s []int) map[int]bool {
+	m := map[int]bool{}
+	for _, x := range s {
+		m[x] = true
+	}
+	return m
+}
+
 func max(x, y int) int {
 	if x > y {
 		return x
@@ -16,8 +24,8 @@ func max(x, y int) int {
 	return y
 }
 
-func contains(set []int, val int) bool {
-	for _, x := range set {
+func contains(s []int, val int) bool {
+	for _, x := range s {
 		if x == val {
 			return true
 		}
