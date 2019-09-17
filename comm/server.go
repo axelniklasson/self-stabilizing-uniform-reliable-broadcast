@@ -13,6 +13,7 @@ type Server struct {
 	Count int
 }
 
+// Start starts the server which then listens for incoming UDP connections
 func (s Server) Start() {
 	conn, _ := net.ListenUDP("udp", &net.UDPAddr{IP: s.IP, Port: s.Port})
 	defer conn.Close()
