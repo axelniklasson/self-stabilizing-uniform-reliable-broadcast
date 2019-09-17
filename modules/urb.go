@@ -213,11 +213,10 @@ func (m *UrbModule) checkReceivingWindow() {
 func (m *UrbModule) updateReceiverCounters() {
 	hasObsolete := true
 	for hasObsolete {
-		r := m.hasObsoleteRecords()
-		if r == nil {
-			hasObsolete = false
-		} else {
+		if r := m.hasObsoleteRecord(); r != nil {
 			m.RxObsS[r.Identifier.ID]++
+		} else {
+			hasObsolete = false
 		}
 	}
 }
@@ -269,8 +268,10 @@ func (m *UrbModule) gossip() {
 	}
 }
 
-// helper methods
-func (m *UrbModule) hasObsoleteRecords() *BufferRecord {
+// --- helper methods ---
+
+// hasObsoleteRecord returns the first found obsolete record, otherwise nil
+func (m *UrbModule) hasObsoleteRecord() *BufferRecord {
 	for _, r := range m.Buffer.Records {
 		if m.obsolete(r) {
 			return &r

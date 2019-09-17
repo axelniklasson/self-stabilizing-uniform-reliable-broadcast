@@ -11,7 +11,7 @@ import (
 type HbfdModule struct {
 	ID       int
 	P        []int
-	Resolver *Resolver
+	Resolver IResolver
 	Hb       []int
 }
 

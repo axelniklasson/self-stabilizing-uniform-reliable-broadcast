@@ -7,36 +7,6 @@ import (
 	"gotest.tools/assert"
 )
 
-type MockResolver struct {
-	Modules    map[ModuleType]interface{}
-	TrustedRet []int
-	HbRet      []int
-}
-
-func (r *MockResolver) hb() []int      { return r.HbRet }
-func (r *MockResolver) trusted() []int { return r.TrustedRet }
-
-func bootstrap() (*UrbModule, *MockResolver) {
-	P := []int{0, 1, 2, 3, 4, 5}
-	seq := 0
-	buffer := Buffer{}
-	rxObsS := []int{}
-	txObsS := []int{}
-	zeroedSlice := []int{}
-	for i := 0; i < len(P); i++ {
-		rxObsS = append(rxObsS, -1)
-		txObsS = append(rxObsS, -1)
-	}
-	r := MockResolver{Modules: make(map[ModuleType]interface{})}
-	urbModule := UrbModule{ID: 0, P: P, Resolver: &r, Seq: seq, Buffer: buffer, RxObsS: rxObsS, TxObsS: txObsS}
-	thetaModule := ThetafdModule{ID: 0, P: P, Resolver: &r, Vector: zeroedSlice}
-
-	r.Modules[URB] = urbModule
-	r.Modules[THETAFD] = thetaModule
-
-	return &urbModule, &r
-}
-
 func TestObsolete(t *testing.T) {
 	mod, resolver := bootstrap()
 	mod.RxObsS = []int{0, 1, 0, 0, 0, 0}
@@ -111,9 +81,9 @@ func TestUpdate(t *testing.T) {
 }
 
 func TestUrbBroadcast(t *testing.T) {
-
+	// TODO
 }
 
 func TestUrbDeliver(t *testing.T) {
-
+	// TODO
 }
