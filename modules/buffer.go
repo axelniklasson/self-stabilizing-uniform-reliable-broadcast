@@ -4,7 +4,7 @@ import "fmt"
 
 // Buffer holds a number of Records
 type Buffer struct {
-	Records []BufferRecord
+	Records []*BufferRecord
 }
 
 // Identifier is a pair (ID, Seq) associating a message with the sender and its local sequence number
@@ -31,14 +31,14 @@ type BufferRecord struct {
 func (b Buffer) Get(id Identifier) *BufferRecord {
 	for _, r := range b.Records {
 		if r.Identifier == id {
-			return &r
+			return r
 		}
 	}
 	return nil
 }
 
 // Add is a wrapper to make it cleaner to add records to the buffer
-func (b *Buffer) Add(br BufferRecord) {
+func (b *Buffer) Add(br *BufferRecord) {
 	b.Records = append(b.Records, br)
 }
 

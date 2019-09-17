@@ -38,18 +38,19 @@ func main() {
 	// parse hosts and build P which is a essentially a slice of all node ids
 	hosts, _ := helpers.ParseHostsFile()
 	P := []int{}
-	zeroedSlice := []int{}
 	for _, p := range hosts {
 		P = append(P, p.ID)
-		zeroedSlice = append(zeroedSlice, 0)
 	}
 
 	resolver := modules.Resolver{}
 
 	// init module
-	urbModule := modules.UrbModule{ID: id, P: P, Resolver: &resolver, Seq: 0, Buffer: modules.Buffer{}, RxObsS: []int{}, TxObsS: []int{}}
-	hbfdModule := modules.HbfdModule{ID: id, P: P, Resolver: &resolver, Hb: zeroedSlice}
-	thetafdModule := modules.ThetafdModule{ID: id, P: P, Resolver: &resolver, Vector: zeroedSlice}
+	urbModule := modules.UrbModule{ID: id, P: P, Resolver: &resolver}
+	urbModule.Init()
+	hbfdModule := modules.HbfdModule{ID: id, P: P, Resolver: &resolver}
+	hbfdModule.Init()
+	thetafdModule := modules.ThetafdModule{ID: id, P: P, Resolver: &resolver}
+	thetafdModule.Init()
 
 	// init resolver and attach modules
 	resolver.Modules = make(map[modules.ModuleType]interface{})
@@ -66,7 +67,6 @@ func main() {
 	wg.Add(1)
 	go func(module modules.HbfdModule) {
 		defer wg.Done()
-		log.Printf("Starting HBFD module")
 		module.DoForever()
 	}(hbfdModule)
 
@@ -74,7 +74,6 @@ func main() {
 	wg.Add(1)
 	go func(module modules.ThetafdModule) {
 		defer wg.Done()
-		log.Printf("Starting THETAFD module")
 		module.DoForever()
 	}(thetafdModule)
 
@@ -82,7 +81,6 @@ func main() {
 	wg.Add(1)
 	go func(module modules.UrbModule) {
 		defer wg.Done()
-		log.Printf("Starting URB module")
 		module.DoForever()
 	}(urbModule)
 
