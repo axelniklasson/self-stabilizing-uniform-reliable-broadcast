@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/comm"
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/helpers"
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/modules"
 )
@@ -62,6 +63,12 @@ func main() {
 	var wg sync.WaitGroup
 
 	// setup communication
+	server := comm.Server{IP: []byte{127, 0, 0, 1}, Port: 4000 + id}
+	wg.Add(1)
+	go func(s *comm.Server) {
+		defer wg.Done()
+		s.Start()
+	}(&server)
 
 	// launch hbfd module
 	wg.Add(1)
