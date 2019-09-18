@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"os"
 	"reflect"
 	"testing"
 
@@ -36,6 +37,8 @@ func bootstrap() (*UrbModule, *MockResolver) {
 	r.Modules[THETAFD] = thetaModule
 	r.Modules[HBFD] = hbfdModule
 
+	os.Setenv("TESTING", "true")
+
 	return &urbModule, &r
 }
 
@@ -52,8 +55,8 @@ func TestFlushBufferIfStaleInfo(t *testing.T) {
 	mod, _ := bootstrap()
 
 	// add two records without stale info, should not be flushed
-	mod.Buffer.Add(&BufferRecord{Msg: &Message{}, Identifier: Identifier{ID: 1, Seq: 0}})
-	mod.Buffer.Add(&BufferRecord{Msg: &Message{}, Identifier: Identifier{ID: 2, Seq: 0}})
+	mod.Buffer.Add(&BufferRecord{Msg: &UrbMessage{}, Identifier: Identifier{ID: 1, Seq: 0}})
+	mod.Buffer.Add(&BufferRecord{Msg: &UrbMessage{}, Identifier: Identifier{ID: 2, Seq: 0}})
 	assert.Equal(t, len(mod.Buffer.Records), 2)
 	mod.flushBufferIfStaleInfo()
 	assert.Equal(t, len(mod.Buffer.Records), 2)
@@ -65,9 +68,9 @@ func TestFlushBufferIfStaleInfo(t *testing.T) {
 	assert.Equal(t, len(mod.Buffer.Records), 0)
 
 	// add two non-stale records and one with a duplicate identifier, buffer should be flushed
-	mod.Buffer.Add(&BufferRecord{Msg: &Message{}, Identifier: Identifier{ID: 1, Seq: 0}})
-	mod.Buffer.Add(&BufferRecord{Msg: &Message{}, Identifier: Identifier{ID: 2, Seq: 0}})
-	mod.Buffer.Add(&BufferRecord{Msg: &Message{}, Identifier: Identifier{ID: 2, Seq: 0}})
+	mod.Buffer.Add(&BufferRecord{Msg: &UrbMessage{}, Identifier: Identifier{ID: 1, Seq: 0}})
+	mod.Buffer.Add(&BufferRecord{Msg: &UrbMessage{}, Identifier: Identifier{ID: 2, Seq: 0}})
+	mod.Buffer.Add(&BufferRecord{Msg: &UrbMessage{}, Identifier: Identifier{ID: 2, Seq: 0}})
 	assert.Equal(t, len(mod.Buffer.Records), 3)
 	mod.flushBufferIfStaleInfo()
 	assert.Equal(t, len(mod.Buffer.Records), 0)
@@ -122,8 +125,8 @@ func TestCheckReceivingWindow(t *testing.T) {
 	mod.RxObsS[1] = 0
 	mod.RxObsS[2] = 10
 
-	mod.Buffer.Add(&BufferRecord{Msg: &Message{}, Identifier: Identifier{ID: 1, Seq: 20}})
-	mod.Buffer.Add(&BufferRecord{Msg: &Message{}, Identifier: Identifier{ID: 2, Seq: 0}})
+	mod.Buffer.Add(&BufferRecord{Msg: &UrbMessage{}, Identifier: Identifier{ID: 1, Seq: 20}})
+	mod.Buffer.Add(&BufferRecord{Msg: &UrbMessage{}, Identifier: Identifier{ID: 2, Seq: 0}})
 	assert.Equal(t, mod.RxObsS[1], 0)
 	assert.Equal(t, mod.RxObsS[2], 10)
 	// should choose 20 (Seq) - 10 (bufferUnitSize) for RxObsS[1] and 10 (RxObsS[2]) for RxObsS[2]

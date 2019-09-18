@@ -12,6 +12,9 @@ import (
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/models"
 )
 
+// Processors is a slice of all processors
+var Processors []models.Processor
+
 // ParseHostsFile parses a host file at the given path and returns a slice of corresponding processors
 func ParseHostsFile() ([]models.Processor, error) {
 	// parse file and exit if error
@@ -47,9 +50,19 @@ func ParseHostsFile() ([]models.Processor, error) {
 				return nil, err
 			}
 			hostname := parts[1]
-			ip := parts[2]
+			ipString := strings.TrimSuffix(parts[2], "\n")
 
-			processors = append(processors, models.Processor{ID: id, Hostname: hostname, IPAddress: ip})
+			// build net.IP struct
+			parts = strings.Split(ipString, ".")
+
+			ip := []byte{}
+			for _, p := range parts {
+				x, _ := strconv.Atoi(p)
+				ip = append(ip, byte(x))
+			}
+
+			p := models.Processor{ID: id, Hostname: hostname, IPString: ipString}
+			processors = append(processors, p)
 		}
 	}
 
@@ -58,5 +71,6 @@ func ParseHostsFile() ([]models.Processor, error) {
 		return nil, err
 	}
 
+	Processors = processors
 	return processors, nil
 }

@@ -8,3 +8,6 @@ const ModuleRunSleepSeconds = 1
 
 // ThetafdW is the amount of messages considered
 const ThetafdW = 10
+
+// ServerBufferSize is the size of the server buffer used when reading messages over the UDP socket
+const ServerBufferSize = 1024

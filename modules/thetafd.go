@@ -37,6 +37,8 @@ func (m *ThetafdModule) Trusted() []int {
 
 // DoForever starts the algorithm and runs forever
 func (m *ThetafdModule) DoForever() {
+	log.Printf("DoForever() starting")
+
 	for {
 		for _, id := range m.P {
 			if id != m.ID {
@@ -45,7 +47,6 @@ func (m *ThetafdModule) DoForever() {
 		}
 
 		time.Sleep(time.Second * constants.ModuleRunSleepSeconds)
-		log.Printf("One iteration of doForever() done")
 	}
 }
 

@@ -70,11 +70,11 @@ func TestUpdate(t *testing.T) {
 	mod.update(nil, 3, 1, 3)
 	assert.Equal(t, len(mod.Buffer.Records), 3)
 	// updating with proper message with new identifier should add to buffer
-	mod.update(&Message{Contents: []byte("asd")}, 3, 0, 3)
+	mod.update(&UrbMessage{Contents: map[string]interface{}{"foo": "bar"}}, 3, 0, 3)
 	assert.Equal(t, len(mod.Buffer.Records), 4)
 
 	// trying to update with a message whose identifier already exists should simply add j and k to recBy
-	mod.update(&Message{Contents: []byte("asd")}, 1, 0, 5)
+	mod.update(&UrbMessage{Contents: map[string]interface{}{"foo": "bar"}}, 1, 0, 5)
 	m := mod.Buffer.Get(Identifier{ID: 1, Seq: 0}).RecBy
 	m2 := map[int]bool{0: true, 1: true, 5: true}
 	assert.Assert(t, reflect.DeepEqual(m, m2))
