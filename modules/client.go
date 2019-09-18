@@ -3,7 +3,6 @@ package modules
 import (
 	"log"
 	"net"
-	"os"
 
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/helpers"
 
@@ -12,10 +11,12 @@ import (
 
 // Send is used to send payload over UDP to a destIP:destPort
 func Send(receiverID int, msg *models.Message) {
-	if _, isSet := os.LookupEnv("TESTING"); isSet {
+	// don't send messages during unit testing
+	if helpers.IsUnitTesting() {
 		return
 	}
 
+	// construct connection to server
 	addr := net.UDPAddr{IP: helpers.Processors[receiverID].IP, Port: 4000 + receiverID}
 	conn, err := net.DialUDP("udp", nil, &addr)
 
@@ -24,11 +25,13 @@ func Send(receiverID int, msg *models.Message) {
 		log.Fatal(err)
 	}
 
+	// prepare payload
 	payload, err := helpers.Pack(msg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// write payload over socket
 	_, err = conn.Write(payload)
 	if err != nil {
 		log.Fatal(err)

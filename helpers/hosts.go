@@ -15,10 +15,17 @@ import (
 // Processors is a slice of all processors
 var Processors []models.Processor
 
+func getHostsPath() string {
+	if IsUnitTesting() {
+		return constants.TestHostFilePath
+	}
+	return constants.HostsFilePath
+}
+
 // ParseHostsFile parses a host file at the given path and returns a slice of corresponding processors
 func ParseHostsFile() ([]models.Processor, error) {
 	// parse file and exit if error
-	file, err := os.Open(constants.HostsFilePath)
+	file, err := os.Open(getHostsPath())
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +54,7 @@ func ParseHostsFile() ([]models.Processor, error) {
 			}
 			id, err := strconv.Atoi(parts[0])
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("Could not parse ID. Got error: %v", err)
 			}
 			hostname := parts[1]
 			ipString := strings.TrimSuffix(parts[2], "\n")
@@ -61,7 +68,7 @@ func ParseHostsFile() ([]models.Processor, error) {
 				ip = append(ip, byte(x))
 			}
 
-			p := models.Processor{ID: id, Hostname: hostname, IPString: ipString}
+			p := models.Processor{ID: id, Hostname: hostname, IPString: ipString, IP: ip}
 			processors = append(processors, p)
 		}
 	}

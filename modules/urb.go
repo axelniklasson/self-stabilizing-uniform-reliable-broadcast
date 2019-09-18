@@ -10,9 +10,6 @@ import (
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/constants"
 )
 
-// bufferUnitSize is used to control the number of messages allowed to be in the buffer for a processor
-const bufferUnitSize = 10
-
 // UrbMessage is the type of the actual message that is sent from the app
 type UrbMessage struct {
 	Contents interface{}
@@ -112,7 +109,7 @@ func (m *UrbModule) update(msg *UrbMessage, j int, s int, k int) {
 // TODO figure out if this really should spawn a goroutine or rather be wrapped entirely in a goroutine
 func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 	go func(m *UrbModule) {
-		for m.Seq < m.minTxObsS()+bufferUnitSize {
+		for m.Seq < m.minTxObsS()+constants.BufferUnitSize {
 		}
 
 		m.Seq++
@@ -204,7 +201,7 @@ func (m *UrbModule) checkTransmitWindow() {
 	}
 
 	// check if should allow this node to send bufferUnitSize messages without considering receivers
-	if !(mS <= m.Seq && m.Seq <= mS+bufferUnitSize && isSubset(s, s2)) {
+	if !(mS <= m.Seq && m.Seq <= mS+constants.BufferUnitSize && isSubset(s, s2)) {
 		for idx := range m.TxObsS {
 			m.TxObsS[idx] = m.Seq
 		}
@@ -215,7 +212,7 @@ func (m *UrbModule) checkTransmitWindow() {
 // is not larger than bufferUnitSize
 func (m *UrbModule) checkReceivingWindow() {
 	for _, k := range m.P {
-		m.RxObsS[k] = max(m.RxObsS[k], m.maxSeq(k)-bufferUnitSize)
+		m.RxObsS[k] = max(m.RxObsS[k], m.maxSeq(k)-constants.BufferUnitSize)
 	}
 }
 
@@ -243,7 +240,7 @@ func (m *UrbModule) trimBuffer() {
 		} else {
 			k := r.Identifier.ID
 			s := r.Identifier.Seq
-			if contains(m.P, k) && m.RxObsS[k] < s && m.maxSeq(k)-bufferUnitSize <= s {
+			if contains(m.P, k) && m.RxObsS[k] < s && m.maxSeq(k)-constants.BufferUnitSize <= s {
 				newBuffer.Add(r)
 			}
 		}

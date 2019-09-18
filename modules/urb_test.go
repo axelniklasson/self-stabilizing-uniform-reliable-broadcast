@@ -1,10 +1,10 @@
 package modules
 
 import (
-	"os"
 	"reflect"
 	"testing"
 
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/helpers"
 	"gotest.tools/assert"
 )
 
@@ -37,8 +37,7 @@ func bootstrap() (*UrbModule, *MockResolver) {
 	r.Modules[THETAFD] = thetaModule
 	r.Modules[HBFD] = hbfdModule
 
-	os.Setenv("TESTING", "true")
-
+	helpers.SetUnitTestingEnv()
 	return &urbModule, &r
 }
 
@@ -214,10 +213,6 @@ func TestProcessMessages(t *testing.T) {
 	mod.Buffer.Records[0].RecBy[1] = true
 	mod.processMessages()
 	assert.Assert(t, mod.Buffer.Records[0].Delivered)
-}
-
-func TestGossip(t *testing.T) {
-	// TODO
 }
 
 func TestHasObsoleteRecord(t *testing.T) {
