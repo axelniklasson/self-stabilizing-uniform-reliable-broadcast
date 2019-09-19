@@ -15,6 +15,14 @@
   version = "v0.2.0"
 
 [[projects]]
+  digest = "1:cbec35fe4d5a4fba369a656a8cd65e244ea2c743007d8f6c1ccb132acf9d1296"
+  name = "github.com/gorilla/mux"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "00bdffe0f3c77e27d2cf6f5c70232a2d3e4d9c15"
+  version = "v1.7.3"
+
+[[projects]]
   digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
   name = "github.com/pkg/errors"
   packages = ["."]
@@ -39,6 +47,9 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["gotest.tools/assert"]
+  input-imports = [
+    "github.com/gorilla/mux",
+    "gotest.tools/assert",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

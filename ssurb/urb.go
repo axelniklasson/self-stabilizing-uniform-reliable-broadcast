@@ -45,7 +45,7 @@ func (m *UrbModule) Init() {
 // all trusted processors have acked the record
 func (m *UrbModule) obsolete(r *BufferRecord) bool {
 	// return false if trusted is not subset of r.RecBy
-	for _, id := range m.Resolver.trusted() {
+	for _, id := range m.Resolver.Trusted() {
 		if _, exists := r.RecBy[id]; !exists {
 			return false
 		}
@@ -69,7 +69,7 @@ func (m *UrbModule) maxSeq(k int) int {
 
 // minTxObsS returns the smallest obsolete sequence number that pi had received from a trusted receiver
 func (m *UrbModule) minTxObsS() int {
-	trusted := m.Resolver.trusted()
+	trusted := m.Resolver.Trusted()
 	min := -1
 	for _, id := range trusted {
 		if min == -1 || m.TxObsS[id] < min {
@@ -251,14 +251,14 @@ func (m *UrbModule) trimBuffer() {
 
 // processMessages delivers messages when acks from all trusted processors are present before sampling hb fd (used for re-transmission)
 func (m *UrbModule) processMessages() {
-	trusted := listToMap(m.Resolver.trusted())
+	trusted := listToMap(m.Resolver.Trusted())
 	for _, r := range m.Buffer.Records {
 		if !r.Delivered && isSubset(trusted, r.RecBy) {
 			m.UrbDeliver(r.Msg)
 		}
 		r.Delivered = r.Delivered || isSubset(trusted, r.RecBy)
 
-		u := m.Resolver.hb()
+		u := m.Resolver.Hb()
 		for _, k := range m.P {
 			if _, exists := r.RecBy[k]; !exists || (r.Identifier.ID == m.ID && r.Identifier.Seq == m.TxObsS[k]+1) && r.PrevHB[k] < u[k] {
 				r.PrevHB = u

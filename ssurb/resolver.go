@@ -21,8 +21,8 @@ const (
 // IResolver defines what interface functions are available for inter-module communication
 // Also makes it testable..
 type IResolver interface {
-	hb() []int
-	trusted() []int
+	Hb() []int
+	Trusted() []int
 
 	Dispatch(*models.Message)
 }
@@ -48,12 +48,14 @@ func (r *Resolver) Dispatch(m *models.Message) {
 	}
 }
 
-func (r *Resolver) hb() []int {
+// Hb calles the HB funciton in the hbfd module
+func (r *Resolver) Hb() []int {
 	m := r.Modules[HBFD].(HbfdModule)
 	return m.HB()
 }
 
-func (r *Resolver) trusted() []int {
+// Trusted calls the Trusted function in the theta fd module
+func (r *Resolver) Trusted() []int {
 	m := r.Modules[THETAFD].(ThetafdModule)
 	return m.Trusted()
 }

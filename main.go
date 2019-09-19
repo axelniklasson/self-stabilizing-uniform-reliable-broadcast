@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/api"
+
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/helpers"
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/ssurb"
 )
@@ -93,6 +95,9 @@ func main() {
 		defer wg.Done()
 		module.DoForever()
 	}(urbModule)
+
+	// launch API
+	api.SetUp(id, &resolver)
 
 	// wait forever and allow modules and communication to run concurrently
 	wg.Wait()

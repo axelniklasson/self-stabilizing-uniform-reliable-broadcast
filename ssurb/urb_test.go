@@ -16,8 +16,8 @@ type MockResolver struct {
 	HbRet      []int
 }
 
-func (r *MockResolver) hb() []int                    { return r.HbRet }
-func (r *MockResolver) trusted() []int               { return r.TrustedRet }
+func (r *MockResolver) Hb() []int                    { return r.HbRet }
+func (r *MockResolver) Trusted() []int               { return r.TrustedRet }
 func (r *MockResolver) Dispatch(msg *models.Message) {}
 
 func bootstrap() (*UrbModule, *MockResolver) {
