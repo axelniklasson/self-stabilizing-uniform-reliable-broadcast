@@ -1,14 +1,19 @@
-package modules
+package ssurb
 
 import (
+	"encoding/json"
 	"log"
 	"time"
+
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/models"
 
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/constants"
 )
 
-// bufferUnitSize is used to control the number of messages allowed to be in the buffer for a processor
-const bufferUnitSize = 10
+// UrbMessage is the type of the actual message that is sent from the app
+type UrbMessage struct {
+	Contents interface{}
+}
 
 // UrbModule models the URB algorithm in the paper
 type UrbModule struct {
@@ -34,18 +39,6 @@ func (m *UrbModule) Init() {
 		m.TxObsS = append(m.TxObsS, -1)
 	}
 }
-
-// MessageType indicates the type of message
-type MessageType int
-
-const (
-	// MSG represents a broadcasted message
-	MSG MessageType = 0
-	// MSGack represents an acknowledgement of a broadcasted message
-	MSGack MessageType = 1
-	// GOSSIP represents messages used by processors to update each other
-	GOSSIP MessageType = 2
-)
 
 // obsolete is used to determine what records in the buffer are considered to be obsolete
 // a record r is obsolete if it is delivered, its seqnum is the next in line to be obsolete and
@@ -88,7 +81,7 @@ func (m *UrbModule) minTxObsS() int {
 
 // update processes a message through creating a unique operation index and adding it to buffer if it's a new message.
 // Otherwise it adds processors j and k to recBy of the existing record
-func (m *UrbModule) update(msg *Message, j int, s int, k int) {
+func (m *UrbModule) update(msg *UrbMessage, j int, s int, k int) {
 	if s <= m.RxObsS[j] {
 		return
 	}
@@ -114,9 +107,9 @@ func (m *UrbModule) update(msg *Message, j int, s int, k int) {
 
 // UrbBroadcast is called from the application layer to broadcast a message
 // TODO figure out if this really should spawn a goroutine or rather be wrapped entirely in a goroutine
-func (m *UrbModule) UrbBroadcast(msg *Message) {
+func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 	go func(m *UrbModule) {
-		for m.Seq < m.minTxObsS()+bufferUnitSize {
+		for m.Seq < m.minTxObsS()+constants.BufferUnitSize {
 		}
 
 		m.Seq++
@@ -125,7 +118,7 @@ func (m *UrbModule) UrbBroadcast(msg *Message) {
 }
 
 // UrbDeliver delivers a message to the application layer
-func (m *UrbModule) UrbDeliver(msg *Message) {
+func (m *UrbModule) UrbDeliver(msg *UrbMessage) {
 	// TODO something more sofisticated with msg than just logging it
 	log.Printf("Delivering message %v\n", msg)
 }
@@ -208,7 +201,7 @@ func (m *UrbModule) checkTransmitWindow() {
 	}
 
 	// check if should allow this node to send bufferUnitSize messages without considering receivers
-	if !(mS <= m.Seq && m.Seq <= mS+bufferUnitSize && isSubset(s, s2)) {
+	if !(mS <= m.Seq && m.Seq <= mS+constants.BufferUnitSize && isSubset(s, s2)) {
 		for idx := range m.TxObsS {
 			m.TxObsS[idx] = m.Seq
 		}
@@ -219,7 +212,7 @@ func (m *UrbModule) checkTransmitWindow() {
 // is not larger than bufferUnitSize
 func (m *UrbModule) checkReceivingWindow() {
 	for _, k := range m.P {
-		m.RxObsS[k] = max(m.RxObsS[k], m.maxSeq(k)-bufferUnitSize)
+		m.RxObsS[k] = max(m.RxObsS[k], m.maxSeq(k)-constants.BufferUnitSize)
 	}
 }
 
@@ -247,7 +240,7 @@ func (m *UrbModule) trimBuffer() {
 		} else {
 			k := r.Identifier.ID
 			s := r.Identifier.Seq
-			if contains(m.P, k) && m.RxObsS[k] < s && m.maxSeq(k)-bufferUnitSize <= s {
+			if contains(m.P, k) && m.RxObsS[k] < s && m.maxSeq(k)-constants.BufferUnitSize <= s {
 				newBuffer.Add(r)
 			}
 		}
@@ -269,7 +262,7 @@ func (m *UrbModule) processMessages() {
 		for _, k := range m.P {
 			if _, exists := r.RecBy[k]; !exists || (r.Identifier.ID == m.ID && r.Identifier.Seq == m.TxObsS[k]+1) && r.PrevHB[k] < u[k] {
 				r.PrevHB = u
-				// TODO send MSG(m,j,s) to pk;
+				m.sendMSG(k, r.Msg, r.Identifier.ID, r.Identifier.Seq)
 			}
 		}
 	}
@@ -279,9 +272,74 @@ func (m *UrbModule) processMessages() {
 func (m *UrbModule) gossip() {
 	for _, k := range m.P {
 		if k != m.ID {
-			// TODO send GOSSIP(maxSeq(k),rxObsS[k],txObsS[k]) to pk;
+			m.sendGOSSIP(k, m.maxSeq(k), m.RxObsS[k], m.TxObsS[k])
 		}
 	}
+}
+
+// --- communication methods ---
+
+func (m *UrbModule) sendMSG(receiverID int, msg *UrbMessage, j int, s int) {
+	jsn, _ := json.Marshal(msg)
+	data := map[string]interface{}{
+		"m": jsn,
+		"j": j,
+		"s": s,
+	}
+
+	message := models.Message{Type: models.MSG, Sender: m.ID, Data: data}
+	go SendToProcessor(receiverID, &message)
+}
+
+func (m *UrbModule) sendMSGack(receiverID int, j int, s int) {
+	data := map[string]interface{}{
+		"j": j,
+		"s": s,
+	}
+
+	message := models.Message{Type: models.MSGack, Sender: m.ID, Data: data}
+	go SendToProcessor(receiverID, &message)
+}
+
+func (m *UrbModule) sendGOSSIP(receiverID int, seqJ int, txObsSJ int, rxObsSJ int) {
+	data := map[string]interface{}{
+		"seqJ":    seqJ,
+		"txObsSJ": txObsSJ,
+		"rxObsSJ": rxObsSJ,
+	}
+
+	message := models.Message{Type: models.GOSSIP, Sender: m.ID, Data: data}
+	go SendToProcessor(receiverID, &message)
+}
+
+func (m *UrbModule) onMSG(msg *models.Message) {
+	var message UrbMessage
+	json.Unmarshal(msg.Data["m"].([]byte), &message)
+
+	k := msg.Sender
+	j := int(msg.Data["j"].(float64))
+	s := int(msg.Data["s"].(float64))
+
+	m.update(&message, j, s, k)
+	m.sendMSGack(k, j, s)
+}
+
+func (m *UrbModule) onMSGack(msg *models.Message) {
+	k := msg.Sender
+	j := int(msg.Data["j"].(float64))
+	s := int(msg.Data["s"].(float64))
+	m.update(nil, j, s, k)
+}
+
+func (m *UrbModule) onGOSSIP(msg *models.Message) {
+	j := msg.Sender
+	seqJ := int(msg.Data["seqJ"].(float64))
+	txObsSJ := int(msg.Data["txObsSJ"].(float64))
+	rxObsSJ := int(msg.Data["rxObsSJ"].(float64))
+
+	m.Seq = max(seqJ, m.Seq)
+	m.TxObsS[j] = max(txObsSJ, m.TxObsS[j])
+	m.RxObsS[j] = max(rxObsSJ, m.RxObsS[j])
 }
 
 // --- helper methods ---

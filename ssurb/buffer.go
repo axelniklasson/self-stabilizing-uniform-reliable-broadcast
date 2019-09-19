@@ -1,4 +1,4 @@
-package modules
+package ssurb
 
 import "fmt"
 
@@ -16,7 +16,7 @@ type Identifier struct {
 // BufferRecord models a record residing in the local buffer of a processor
 type BufferRecord struct {
 	// the actual message
-	Msg *Message
+	Msg *UrbMessage
 	// identifier of message, made up of ID (sender id) and Seq (local sequence number at sender)
 	Identifier Identifier
 	// holds false only when the message still needs to be delivered

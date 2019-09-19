@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/helpers"
-	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/modules"
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/ssurb"
 )
 
 func getNodeIDs() []int {
@@ -42,44 +42,54 @@ func main() {
 		P = append(P, p.ID)
 	}
 
-	resolver := modules.Resolver{}
+	resolver := ssurb.Resolver{}
 
 	// init module
-	urbModule := modules.UrbModule{ID: id, P: P, Resolver: &resolver}
+	urbModule := ssurb.UrbModule{ID: id, P: P, Resolver: &resolver}
 	urbModule.Init()
-	hbfdModule := modules.HbfdModule{ID: id, P: P, Resolver: &resolver}
+	hbfdModule := ssurb.HbfdModule{ID: id, P: P, Resolver: &resolver}
 	hbfdModule.Init()
-	thetafdModule := modules.ThetafdModule{ID: id, P: P, Resolver: &resolver}
+	thetafdModule := ssurb.ThetafdModule{ID: id, P: P, Resolver: &resolver}
 	thetafdModule.Init()
 
 	// init resolver and attach modules
-	resolver.Modules = make(map[modules.ModuleType]interface{})
-	resolver.Modules[modules.URB] = urbModule
-	resolver.Modules[modules.HBFD] = hbfdModule
-	resolver.Modules[modules.THETAFD] = thetafdModule
+	resolver.Modules = make(map[ssurb.ModuleType]interface{})
+	resolver.Modules[ssurb.URB] = urbModule
+	resolver.Modules[ssurb.HBFD] = hbfdModule
+	resolver.Modules[ssurb.THETAFD] = thetafdModule
 
 	// init waitgroup to keep track of all goroutines
 	var wg sync.WaitGroup
 
 	// setup communication
+	server := ssurb.Server{IP: []byte{127, 0, 0, 1}, Port: 4000 + id, Resolver: &resolver}
+	wg.Add(1)
+	go func(s *ssurb.Server) {
+		defer wg.Done()
+		err := s.Start()
+		if err != nil {
+			log.Fatal(err)
+		}
+		s.Listen()
+	}(&server)
 
 	// launch hbfd module
 	wg.Add(1)
-	go func(module modules.HbfdModule) {
+	go func(module ssurb.HbfdModule) {
 		defer wg.Done()
 		module.DoForever()
 	}(hbfdModule)
 
 	// launch thetafd module
 	wg.Add(1)
-	go func(module modules.ThetafdModule) {
+	go func(module ssurb.ThetafdModule) {
 		defer wg.Done()
 		module.DoForever()
 	}(thetafdModule)
 
 	// launch urb module
 	wg.Add(1)
-	go func(module modules.UrbModule) {
+	go func(module ssurb.UrbModule) {
 		defer wg.Done()
 		module.DoForever()
 	}(urbModule)

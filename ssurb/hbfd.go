@@ -1,4 +1,4 @@
-package modules
+package ssurb
 
 import (
 	"log"
@@ -30,6 +30,8 @@ func (m *HbfdModule) HB() []int {
 
 // DoForever starts the algorithm and runs forever
 func (m *HbfdModule) DoForever() {
+	log.Printf("DoForever() starting")
+
 	for {
 		for _, id := range m.P {
 			if id != m.ID {
@@ -38,7 +40,6 @@ func (m *HbfdModule) DoForever() {
 		}
 
 		time.Sleep(time.Second * constants.ModuleRunSleepSeconds)
-		log.Printf("One iteration of doForever() done")
 	}
 }
 

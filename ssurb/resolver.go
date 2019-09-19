@@ -1,4 +1,10 @@
-package modules
+package ssurb
+
+import (
+	"log"
+
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/models"
+)
 
 // ModuleType indicates the type of module
 type ModuleType int
@@ -17,11 +23,29 @@ const (
 type IResolver interface {
 	hb() []int
 	trusted() []int
+
+	Dispatch(*models.Message)
 }
 
 // Resolver facilitates inter-module communication
 type Resolver struct {
 	Modules map[ModuleType]interface{}
+}
+
+// Dispatch routes an incoming message to the correct module
+func (r *Resolver) Dispatch(m *models.Message) {
+	urbModule := r.Modules[URB].(UrbModule)
+
+	switch m.Type {
+	case models.MSG:
+		urbModule.onMSG(m)
+	case models.MSGack:
+		urbModule.onMSGack(m)
+	case models.GOSSIP:
+		urbModule.onGOSSIP(m)
+	default:
+		log.Fatalf("Got unrecognized message %v", m)
+	}
 }
 
 func (r *Resolver) hb() []int {
