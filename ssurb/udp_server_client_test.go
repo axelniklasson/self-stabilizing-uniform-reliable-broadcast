@@ -11,7 +11,7 @@ import (
 	"gotest.tools/assert"
 )
 
-const PORT = 4000
+const PORT = 8080
 
 var IP = []byte{0, 0, 0, 0}
 
@@ -53,8 +53,11 @@ func TestSend(t *testing.T) {
 	err = send(addr, &msg)
 	assert.NilError(t, err)
 	send(addr, &msg)
+	assert.NilError(t, err)
 	send(addr, &msg)
+	assert.NilError(t, err)
 	send(addr, &msg)
+	assert.NilError(t, err)
 
 	messagesDelivered := false
 	tries := 0
