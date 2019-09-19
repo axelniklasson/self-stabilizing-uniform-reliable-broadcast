@@ -2,6 +2,7 @@ package ssurb
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"testing"
 	"time"
@@ -55,6 +56,15 @@ func TestSend(t *testing.T) {
 	send(addr, &msg)
 	send(addr, &msg)
 
-	time.Sleep(5 * time.Second)
-	assert.Equal(t, server.Count, 4)
+	messagesDelivered := false
+	tries := 0
+	for !messagesDelivered && tries < 5 {
+		messagesDelivered = server.Count == 4
+		if !messagesDelivered {
+			log.Println("Messages not delivered yet, sleeping 2s..")
+			time.Sleep(2 * time.Second)
+		}
+		tries++
+	}
+	assert.Assert(t, messagesDelivered)
 }
