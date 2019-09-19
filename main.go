@@ -3,12 +3,14 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
 	"sync"
 
-	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/api"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/api"
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/helpers"
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/ssurb"
 )
@@ -101,6 +103,16 @@ func main() {
 	go func() {
 		defer wg.Done()
 		api.SetUp(id, &resolver)
+	}()
+
+	// instrument application with prometheus metrics
+	go func() {
+		log.Print("Launching Prometheus server on port 2112")
+
+		http.Handle("/metrics", promhttp.Handler())
+		// let metrics port be 2112 for id = 0, 2113 for id = 1 and upwards
+		// official doc recommend 2112, so got it from there
+		http.ListenAndServe(fmt.Sprintf(":%d", 2112+id), nil)
 	}()
 
 	// wait forever and allow modules and communication to run concurrently
