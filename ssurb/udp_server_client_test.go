@@ -55,6 +55,6 @@ func TestSend(t *testing.T) {
 	send(addr, &msg)
 	send(addr, &msg)
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(5 * time.Second)
 	assert.Equal(t, server.Count, 4)
 }
