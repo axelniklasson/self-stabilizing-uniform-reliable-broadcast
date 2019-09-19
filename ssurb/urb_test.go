@@ -1,8 +1,10 @@
-package modules
+package ssurb
 
 import (
 	"reflect"
 	"testing"
+
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/models"
 
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/helpers"
 	"gotest.tools/assert"
@@ -14,8 +16,9 @@ type MockResolver struct {
 	HbRet      []int
 }
 
-func (r *MockResolver) hb() []int      { return r.HbRet }
-func (r *MockResolver) trusted() []int { return r.TrustedRet }
+func (r *MockResolver) hb() []int                    { return r.HbRet }
+func (r *MockResolver) trusted() []int               { return r.TrustedRet }
+func (r *MockResolver) Dispatch(msg *models.Message) {}
 
 func bootstrap() (*UrbModule, *MockResolver) {
 	P := []int{0, 1, 2, 3, 4, 5}

@@ -1,4 +1,4 @@
-package modules
+package ssurb
 
 func isSubset(s, s2 map[int]bool) bool {
 	for key := range s {

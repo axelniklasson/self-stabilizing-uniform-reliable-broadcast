@@ -1,4 +1,4 @@
-package modules
+package ssurb
 
 import (
 	"log"
@@ -13,23 +13,32 @@ import (
 type Server struct {
 	Port     int
 	IP       net.IP
-	Resolver *Resolver
+	Resolver IResolver
+	Conn     *net.UDPConn
 
 	Count int
 }
 
-// Start starts the server which then listens for incoming UDP connections
-func (s Server) Start() {
+// Start starts the server and binds it to IP:PORT
+func (s *Server) Start() error {
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: s.IP, Port: s.Port})
-	defer conn.Close()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	log.Printf("Server listening on %s\n", conn.LocalAddr().String())
 
+	log.Printf("Server listening on %s\n", conn.LocalAddr().String())
+	s.Conn = conn
+	s.Count = 0
+	return nil
+}
+
+// Listen tells the server to start listening for packets on IP:PORT
+func (s *Server) Listen() error {
+	defer s.Conn.Close()
 	buf := make([]byte, constants.ServerBufferSize)
+
 	for {
-		n, _, err := conn.ReadFromUDP(buf)
+		n, _, err := s.Conn.ReadFromUDP(buf)
 
 		if err != nil {
 			log.Fatal(err)

@@ -1,4 +1,4 @@
-package modules
+package ssurb
 
 import (
 	"log"
@@ -23,6 +23,8 @@ const (
 type IResolver interface {
 	hb() []int
 	trusted() []int
+
+	Dispatch(*models.Message)
 }
 
 // Resolver facilitates inter-module communication

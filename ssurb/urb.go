@@ -1,4 +1,4 @@
-package modules
+package ssurb
 
 import (
 	"encoding/json"
@@ -288,7 +288,7 @@ func (m *UrbModule) sendMSG(receiverID int, msg *UrbMessage, j int, s int) {
 	}
 
 	message := models.Message{Type: models.MSG, Sender: m.ID, Data: data}
-	go Send(receiverID, &message)
+	go SendToProcessor(receiverID, &message)
 }
 
 func (m *UrbModule) sendMSGack(receiverID int, j int, s int) {
@@ -298,7 +298,7 @@ func (m *UrbModule) sendMSGack(receiverID int, j int, s int) {
 	}
 
 	message := models.Message{Type: models.MSGack, Sender: m.ID, Data: data}
-	go Send(receiverID, &message)
+	go SendToProcessor(receiverID, &message)
 }
 
 func (m *UrbModule) sendGOSSIP(receiverID int, seqJ int, txObsSJ int, rxObsSJ int) {
@@ -309,7 +309,7 @@ func (m *UrbModule) sendGOSSIP(receiverID int, seqJ int, txObsSJ int, rxObsSJ in
 	}
 
 	message := models.Message{Type: models.GOSSIP, Sender: m.ID, Data: data}
-	go Send(receiverID, &message)
+	go SendToProcessor(receiverID, &message)
 }
 
 func (m *UrbModule) onMSG(msg *models.Message) {
