@@ -2,6 +2,7 @@ package ssurb
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"testing"
 	"time"
@@ -10,7 +11,7 @@ import (
 	"gotest.tools/assert"
 )
 
-const PORT = 4000
+const PORT = 8080
 
 var IP = []byte{0, 0, 0, 0}
 
@@ -52,9 +53,21 @@ func TestSend(t *testing.T) {
 	err = send(addr, &msg)
 	assert.NilError(t, err)
 	send(addr, &msg)
+	assert.NilError(t, err)
 	send(addr, &msg)
+	assert.NilError(t, err)
 	send(addr, &msg)
+	assert.NilError(t, err)
 
-	time.Sleep(5 * time.Second)
-	assert.Equal(t, server.Count, 4)
+	messagesDelivered := false
+	tries := 0
+	for !messagesDelivered && tries < 5 {
+		messagesDelivered = server.Count == 4
+		if !messagesDelivered {
+			log.Println("Messages not delivered yet, sleeping 2s..")
+			time.Sleep(2 * time.Second)
+		}
+		tries++
+	}
+	assert.Assert(t, messagesDelivered)
 }

@@ -97,7 +97,11 @@ func main() {
 	}(urbModule)
 
 	// launch API
-	api.SetUp(id, &resolver)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		api.SetUp(id, &resolver)
+	}()
 
 	// wait forever and allow modules and communication to run concurrently
 	wg.Wait()

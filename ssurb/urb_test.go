@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/constants"
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/models"
 
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/helpers"
@@ -129,13 +130,12 @@ func TestCheckReceivingWindow(t *testing.T) {
 	mod.RxObsS[2] = 10
 
 	mod.Buffer.Add(&BufferRecord{Msg: &UrbMessage{}, Identifier: Identifier{ID: 1, Seq: 20}})
-	mod.Buffer.Add(&BufferRecord{Msg: &UrbMessage{}, Identifier: Identifier{ID: 2, Seq: 0}})
+	mod.Buffer.Add(&BufferRecord{Msg: &UrbMessage{}, Identifier: Identifier{ID: 2, Seq: 500}})
 	assert.Equal(t, mod.RxObsS[1], 0)
 	assert.Equal(t, mod.RxObsS[2], 10)
-	// should choose 20 (Seq) - 10 (bufferUnitSize) for RxObsS[1] and 10 (RxObsS[2]) for RxObsS[2]
 	mod.checkReceivingWindow()
-	assert.Equal(t, mod.RxObsS[1], 10)
-	assert.Equal(t, mod.RxObsS[2], 10)
+	assert.Equal(t, mod.RxObsS[1], 0)
+	assert.Equal(t, mod.RxObsS[2], 500-constants.BufferUnitSize)
 }
 
 func TestUpdateReceiverCounters(t *testing.T) {

@@ -1,4 +1,5 @@
 # Self-stabilizing Uniform Reliable Broadcast (URB)
+[![Build Status](https://travis-ci.org/axelniklasson/self-stabilizing-uniform-reliable-broadcast.svg?branch=master)](https://travis-ci.org/axelniklasson/self-stabilizing-uniform-reliable-broadcast)
 
 ## Set up
 First, make sure that [Go](https://golang.org/doc/install) is installed. This project was developed for version `1.13`, so that is the recommended version to use. Then, install [dep](https://golang.github.io/dep/docs/installation.html).
@@ -18,4 +19,4 @@ dep ensure
 ```
 
 ## Testing
-All unit tests can be run through the bash script as `sh scripts/test.sh`.foo
+All unit tests can be run through the bash script as `sh scripts/test.sh`.
