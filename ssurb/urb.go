@@ -1,7 +1,6 @@
 package ssurb
 
 import (
-	"encoding/json"
 	"log"
 	"time"
 
@@ -12,7 +11,7 @@ import (
 
 // UrbMessage is the type of the actual message that is sent from the app
 type UrbMessage struct {
-	Contents interface{}
+	Text string
 }
 
 // UrbModule models the URB algorithm in the paper
@@ -76,6 +75,7 @@ func (m *UrbModule) minTxObsS() int {
 			min = m.TxObsS[id]
 		}
 	}
+
 	return min
 }
 
@@ -97,8 +97,8 @@ func (m *UrbModule) update(msg *UrbMessage, j int, s int, k int) {
 			prevHB = append(prevHB, -1)
 		}
 
-		newRecord := BufferRecord{Msg: msg, Identifier: id, Delivered: false, RecBy: recBy, PrevHB: prevHB}
-		m.Buffer.Add(&newRecord)
+		newRecord := &BufferRecord{Msg: msg, Identifier: id, Delivered: false, RecBy: recBy, PrevHB: prevHB}
+		m.Buffer.Add(newRecord)
 	} else if r != nil {
 		r.RecBy[j] = true
 		r.RecBy[k] = true
@@ -106,14 +106,15 @@ func (m *UrbModule) update(msg *UrbMessage, j int, s int, k int) {
 }
 
 // UrbBroadcast is called from the application layer to broadcast a message
-// TODO figure out if this really should spawn a goroutine or rather be wrapped entirely in a goroutine
 func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 	go func(m *UrbModule) {
-		for m.Seq < m.minTxObsS()+constants.BufferUnitSize {
-		}
+		// TODO figure out why it always blocks here
+		// for m.Seq < m.minTxObsS()+constants.BufferUnitSize {
+		// }
 
 		m.Seq++
 		m.update(msg, m.ID, m.Seq, m.ID)
+		log.Printf("msg broadcasted")
 	}(m)
 }
 
@@ -280,11 +281,10 @@ func (m *UrbModule) gossip() {
 // --- communication methods ---
 
 func (m *UrbModule) sendMSG(receiverID int, msg *UrbMessage, j int, s int) {
-	jsn, _ := json.Marshal(msg)
 	data := map[string]interface{}{
-		"m": jsn,
-		"j": j,
-		"s": s,
+		"msgText": msg.Text,
+		"j":       j,
+		"s":       s,
 	}
 
 	message := models.Message{Type: models.MSG, Sender: m.ID, Data: data}
@@ -313,10 +313,8 @@ func (m *UrbModule) sendGOSSIP(receiverID int, seqJ int, txObsSJ int, rxObsSJ in
 }
 
 func (m *UrbModule) onMSG(msg *models.Message) {
-	var message UrbMessage
-	json.Unmarshal(msg.Data["m"].([]byte), &message)
-
 	k := msg.Sender
+	message := UrbMessage{Text: msg.Data["msgText"].(string)}
 	j := int(msg.Data["j"].(float64))
 	s := int(msg.Data["s"].(float64))
 

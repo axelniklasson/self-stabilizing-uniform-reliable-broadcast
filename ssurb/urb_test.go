@@ -18,6 +18,7 @@ type MockResolver struct {
 
 func (r *MockResolver) Hb() []int                    { return r.HbRet }
 func (r *MockResolver) Trusted() []int               { return r.TrustedRet }
+func (r *MockResolver) UrbBroadcast(msg *UrbMessage) {}
 func (r *MockResolver) Dispatch(msg *models.Message) {}
 
 func bootstrap() (*UrbModule, *MockResolver) {
@@ -203,9 +204,8 @@ func TestProcessMessages(t *testing.T) {
 
 	// add one record to deliver and one record that should not be delivered due to trusted not subset of recby
 	buf := mod.Buffer
-	buf.Add(&BufferRecord{Identifier: Identifier{ID: 1, Seq: 0}, RecBy: map[int]bool{0: true}})
-	// mod.Buffer.Add()
-	buf.Add(&BufferRecord{Identifier: Identifier{ID: 1, Seq: 1}, RecBy: map[int]bool{0: true, 1: true, 2: true}})
+	buf.Add(&BufferRecord{Msg: &UrbMessage{Text: "Hello world!"}, Identifier: Identifier{ID: 1, Seq: 0}, RecBy: map[int]bool{0: true}})
+	buf.Add(&BufferRecord{Msg: &UrbMessage{Text: "Hello world!"}, Identifier: Identifier{ID: 1, Seq: 1}, RecBy: map[int]bool{0: true, 1: true, 2: true}})
 	assert.Assert(t, !mod.Buffer.Records[0].Delivered)
 	assert.Assert(t, !mod.Buffer.Records[1].Delivered)
 	mod.processMessages()

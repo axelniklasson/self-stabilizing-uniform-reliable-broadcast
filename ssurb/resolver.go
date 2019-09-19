@@ -23,7 +23,7 @@ const (
 type IResolver interface {
 	Hb() []int
 	Trusted() []int
-
+	UrbBroadcast(*UrbMessage)
 	Dispatch(*models.Message)
 }
 
@@ -32,9 +32,27 @@ type Resolver struct {
 	Modules map[ModuleType]interface{}
 }
 
+// Hb calles the HB funciton in the hbfd module
+func (r *Resolver) Hb() []int {
+	m := r.Modules[HBFD].(*HbfdModule)
+	return m.HB()
+}
+
+// Trusted calls the Trusted function in the theta fd module
+func (r *Resolver) Trusted() []int {
+	m := r.Modules[THETAFD].(*ThetafdModule)
+	return m.Trusted()
+}
+
+// UrbBroadcast is called by the API whenever a message came from the application layer to be broadcasted
+func (r *Resolver) UrbBroadcast(msg *UrbMessage) {
+	m := r.Modules[URB].(*UrbModule)
+	m.UrbBroadcast(msg)
+}
+
 // Dispatch routes an incoming message to the correct module
 func (r *Resolver) Dispatch(m *models.Message) {
-	urbModule := r.Modules[URB].(UrbModule)
+	urbModule := r.Modules[URB].(*UrbModule)
 
 	switch m.Type {
 	case models.MSG:
@@ -46,16 +64,4 @@ func (r *Resolver) Dispatch(m *models.Message) {
 	default:
 		log.Fatalf("Got unrecognized message %v", m)
 	}
-}
-
-// Hb calles the HB funciton in the hbfd module
-func (r *Resolver) Hb() []int {
-	m := r.Modules[HBFD].(HbfdModule)
-	return m.HB()
-}
-
-// Trusted calls the Trusted function in the theta fd module
-func (r *Resolver) Trusted() []int {
-	m := r.Modules[THETAFD].(ThetafdModule)
-	return m.Trusted()
 }
