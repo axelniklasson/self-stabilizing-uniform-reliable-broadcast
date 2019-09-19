@@ -114,20 +114,17 @@ func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 
 		m.Seq++
 		m.update(msg, m.ID, m.Seq, m.ID)
-		log.Printf("msg broadcasted")
+		log.Printf("Broadcasted message \"%s\"", msg.Text)
 	}(m)
 }
 
 // UrbDeliver delivers a message to the application layer
 func (m *UrbModule) UrbDeliver(msg *UrbMessage) {
-	// TODO something more sofisticated with msg than just logging it
-	log.Printf("Delivering message %v\n", msg)
+	log.Printf("Delivering message \"%s\"", msg.Text)
 }
 
 // DoForever starts the algorithm and runs forever
 func (m *UrbModule) DoForever() {
-	log.Printf("DoForever() starting")
-
 	for {
 		// lines 18-19
 		m.flushBufferIfStaleInfo()

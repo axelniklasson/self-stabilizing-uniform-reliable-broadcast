@@ -5,6 +5,16 @@
 BLUE='\033[1;34m'
 NO_COLOR='\033[0m'
 
+checkArgs () {
+    if [ $# -lt 1 ]; then
+    echo 1>&2 "$0: not enough arguments"
+    exit 2
+    elif [ $# -gt 1 ]; then
+    echo 1>&2 "$0: too many arguments"
+    exit 2
+    fi
+}
+
 log () {
 	echo -e "${BLUE}Launcher ==> $1${NO_COLOR}"
 }

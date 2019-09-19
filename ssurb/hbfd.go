@@ -1,7 +1,6 @@
 package ssurb
 
 import (
-	"log"
 	"time"
 
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/constants"
@@ -30,8 +29,6 @@ func (m *HbfdModule) HB() []int {
 
 // DoForever starts the algorithm and runs forever
 func (m *HbfdModule) DoForever() {
-	log.Printf("DoForever() starting")
-
 	for {
 		for _, id := range m.P {
 			if id != m.ID {

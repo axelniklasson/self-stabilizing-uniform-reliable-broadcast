@@ -26,7 +26,7 @@ func (s *Server) Start() error {
 		return err
 	}
 
-	log.Printf("Server listening on %s\n", conn.LocalAddr().String())
+	log.Printf("UDP Server listening on %s\n", conn.LocalAddr().String())
 	s.Conn = conn
 	s.Count = 0
 	return nil

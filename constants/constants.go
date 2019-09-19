@@ -19,4 +19,4 @@ const ServerBufferSize = 1024
 const UnitTestingEnvVar = "UNIT_TESTING"
 
 // BufferUnitSize is used to control the number of messages allowed to be in the buffer for a processor
-const BufferUnitSize = 10
+const BufferUnitSize = 50

@@ -1,7 +1,6 @@
 package ssurb
 
 import (
-	"log"
 	"time"
 
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/constants"
@@ -27,7 +26,7 @@ func (m *ThetafdModule) Init() {
 func (m *ThetafdModule) Trusted() []int {
 	trusted := []int{}
 	for idx, x := range m.Vector {
-		if x < constants.ThetafdW {
+		if x < constants.ThetafdW && idx != m.ID {
 			trusted = append(trusted, idx)
 		}
 	}
@@ -37,8 +36,6 @@ func (m *ThetafdModule) Trusted() []int {
 
 // DoForever starts the algorithm and runs forever
 func (m *ThetafdModule) DoForever() {
-	log.Printf("DoForever() starting")
-
 	for {
 		for _, id := range m.P {
 			if id != m.ID {
