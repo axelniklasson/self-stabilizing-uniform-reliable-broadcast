@@ -4,6 +4,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/helpers"
+
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/models"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -142,8 +144,11 @@ func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 // UrbDeliver delivers a message to the application layer
 func (m *UrbModule) UrbDeliver(msg *UrbMessage) {
 	log.Printf("Delivering message \"%s\"", msg.Text)
-	m.Metrics.DeliveredMessagesCount.Inc()
-	m.Metrics.DeliveredByteCount.Add(float64(len(msg.Text)))
+
+	if !helpers.IsUnitTesting() && m.Metrics != nil {
+		m.Metrics.DeliveredMessagesCount.Inc()
+		m.Metrics.DeliveredByteCount.Add(float64(len(msg.Text)))
+	}
 }
 
 // DoForever starts the algorithm and runs forever

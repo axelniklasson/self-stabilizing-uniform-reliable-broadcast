@@ -106,13 +106,13 @@ func main() {
 	}()
 
 	// instrument application with prometheus metrics
+	// let metrics port be 2112 for id = 0, 2113 for id = 1 and upwards
+	// official doc recommend 2112, so got it from there
 	go func() {
-		log.Print("Launching Prometheus server on port 2112")
-
+		port := 2112 + id
 		http.Handle("/metrics", promhttp.Handler())
-		// let metrics port be 2112 for id = 0, 2113 for id = 1 and upwards
-		// official doc recommend 2112, so got it from there
-		http.ListenAndServe(fmt.Sprintf(":%d", 2112+id), nil)
+		log.Printf("Launching Prometheus server on port %d", port)
+		http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 	}()
 
 	// wait forever and allow modules and communication to run concurrently
