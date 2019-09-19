@@ -12,7 +12,7 @@ import (
 
 const PORT = 4000
 
-var IP = []byte{127, 0, 0, 1}
+var IP = []byte{0, 0, 0, 0}
 
 var r = MockResolver{Modules: make(map[ModuleType]interface{})}
 
