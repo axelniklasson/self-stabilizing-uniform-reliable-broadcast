@@ -47,11 +47,11 @@ func main() {
 	resolver := ssurb.Resolver{}
 
 	// init module
-	urbModule := ssurb.UrbModule{ID: id, P: P, Resolver: &resolver}
+	urbModule := &ssurb.UrbModule{ID: id, P: P, Resolver: &resolver}
 	urbModule.Init()
-	hbfdModule := ssurb.HbfdModule{ID: id, P: P, Resolver: &resolver}
+	hbfdModule := &ssurb.HbfdModule{ID: id, P: P, Resolver: &resolver}
 	hbfdModule.Init()
-	thetafdModule := ssurb.ThetafdModule{ID: id, P: P, Resolver: &resolver}
+	thetafdModule := &ssurb.ThetafdModule{ID: id, P: P, Resolver: &resolver}
 	thetafdModule.Init()
 
 	// init resolver and attach modules
@@ -77,21 +77,21 @@ func main() {
 
 	// launch hbfd module
 	wg.Add(1)
-	go func(module ssurb.HbfdModule) {
+	go func(module *ssurb.HbfdModule) {
 		defer wg.Done()
 		module.DoForever()
 	}(hbfdModule)
 
 	// launch thetafd module
 	wg.Add(1)
-	go func(module ssurb.ThetafdModule) {
+	go func(module *ssurb.ThetafdModule) {
 		defer wg.Done()
 		module.DoForever()
 	}(thetafdModule)
 
 	// launch urb module
 	wg.Add(1)
-	go func(module ssurb.UrbModule) {
+	go func(module *ssurb.UrbModule) {
 		defer wg.Done()
 		module.DoForever()
 	}(urbModule)
