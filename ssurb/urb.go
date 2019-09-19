@@ -4,7 +4,11 @@ import (
 	"log"
 	"time"
 
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/helpers"
+
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/models"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/constants"
 )
@@ -12,6 +16,11 @@ import (
 // UrbMessage is the type of the actual message that is sent from the app
 type UrbMessage struct {
 	Text string
+}
+
+type urbMetrics struct {
+	DeliveredMessagesCount prometheus.Counter
+	DeliveredByteCount     prometheus.Counter
 }
 
 // UrbModule models the URB algorithm in the paper
@@ -24,6 +33,8 @@ type UrbModule struct {
 	Buffer *Buffer
 	RxObsS []int
 	TxObsS []int
+
+	Metrics *urbMetrics
 }
 
 // Init initializes the urb module
@@ -36,6 +47,18 @@ func (m *UrbModule) Init() {
 	for i := 0; i < len(m.P); i++ {
 		m.RxObsS = append(m.RxObsS, -1)
 		m.TxObsS = append(m.TxObsS, -1)
+	}
+
+	// init metrics
+	m.Metrics = &urbMetrics{
+		DeliveredMessagesCount: promauto.NewCounter(prometheus.CounterOpts{
+			Name: "urb_delivered_messages_count",
+			Help: "The total number of delivered messages",
+		}),
+		DeliveredByteCount: promauto.NewCounter(prometheus.CounterOpts{
+			Name: "urb_delivered_bytes_count",
+			Help: "The total number of delivered bytes",
+		}),
 	}
 }
 
@@ -121,6 +144,11 @@ func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 // UrbDeliver delivers a message to the application layer
 func (m *UrbModule) UrbDeliver(msg *UrbMessage) {
 	log.Printf("Delivering message \"%s\"", msg.Text)
+
+	if !helpers.IsUnitTesting() && m.Metrics != nil {
+		m.Metrics.DeliveredMessagesCount.Inc()
+		m.Metrics.DeliveredByteCount.Add(float64(len(msg.Text)))
+	}
 }
 
 // DoForever starts the algorithm and runs forever

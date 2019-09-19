@@ -16,3 +16,9 @@ func IsUnitTesting() bool {
 	_, isSet := os.LookupEnv(constants.UnitTestingEnvVar)
 	return isSet
 }
+
+// IsRunningOnTravis returns true if the travis ci env var is set
+func IsRunningOnTravis() bool {
+	_, isSet := os.LookupEnv(constants.TravisEnvVar)
+	return isSet
+}

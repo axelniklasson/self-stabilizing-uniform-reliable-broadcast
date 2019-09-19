@@ -18,5 +18,8 @@ const ServerBufferSize = 1024
 // UnitTestingEnvVar indicates that the system is performing unit tests
 const UnitTestingEnvVar = "UNIT_TESTING"
 
+// TravisEnvVar indicates that the system is running on travis ci
+const TravisEnvVar = "TRAVIS_CI"
+
 // BufferUnitSize is used to control the number of messages allowed to be in the buffer for a processor
 const BufferUnitSize = 50
