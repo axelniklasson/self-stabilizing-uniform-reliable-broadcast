@@ -10,8 +10,10 @@ const (
 	MSGack MessageType = 1
 	// GOSSIP represents messages used by processors to update each other
 	GOSSIP MessageType = 2
-	// HEARTBEAT represents a fd message
-	HEARTBEAT MessageType = 3
+	// HBFDheartbeat represents a hbfd message
+	HBFDheartbeat MessageType = 3
+	// THETAheartbeat represents a hbfd message
+	THETAheartbeat MessageType = 4
 )
 
 // Message represents a message sent between two processors over UDP
