@@ -42,7 +42,7 @@ func (b *Buffer) Add(br *BufferRecord) {
 	b.Records = append(b.Records, br)
 }
 
-func (br BufferRecord) String() string {
+func (br *BufferRecord) String() string {
 	return fmt.Sprintf(
 		"BufferRecord - Msg: %v, ID: %d, Seq: %d, Delivered: %t, RecBy: %v, PrevHB: %v",
 		br.Msg, br.Identifier.ID, br.Identifier.Seq, br.Delivered, br.RecBy, br.PrevHB)

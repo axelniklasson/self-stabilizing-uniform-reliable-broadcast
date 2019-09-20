@@ -22,4 +22,4 @@ const UnitTestingEnvVar = "UNIT_TESTING"
 const TravisEnvVar = "TRAVIS_CI"
 
 // BufferUnitSize is used to control the number of messages allowed to be in the buffer for a processor
-const BufferUnitSize = 50
+const BufferUnitSize = 10000

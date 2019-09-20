@@ -2,6 +2,7 @@ package ssurb
 
 import (
 	"log"
+	"sync"
 	"time"
 
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/helpers"
@@ -12,6 +13,8 @@ import (
 
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/constants"
 )
+
+var mux sync.Mutex
 
 // UrbMessage is the type of the actual message that is sent from the app
 type UrbMessage struct {
@@ -131,13 +134,23 @@ func (m *UrbModule) update(msg *UrbMessage, j int, s int, k int) {
 // UrbBroadcast is called from the application layer to broadcast a message
 func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 	go func(m *UrbModule) {
-		// TODO figure out why it always blocks here
-		// for m.Seq < m.minTxObsS()+constants.BufferUnitSize {
-		// }
+		// grab lock
+		mux.Lock()
+
+		// busy-wait until flow control mechanism ensures enough space on all trusted receivers
+		for m.Seq >= m.minTxObsS()+constants.BufferUnitSize {
+			// release lock, sleep and grab it again before next check
+			mux.Unlock()
+			time.Sleep(time.Microsecond * 10)
+			mux.Lock()
+		}
 
 		m.Seq++
 		m.update(msg, m.ID, m.Seq, m.ID)
 		log.Printf("Broadcasted message \"%s\"", msg.Text)
+
+		// release lock
+		mux.Unlock()
 	}(m)
 }
 
@@ -154,6 +167,9 @@ func (m *UrbModule) UrbDeliver(msg *UrbMessage) {
 // DoForever starts the algorithm and runs forever
 func (m *UrbModule) DoForever() {
 	for {
+		// retrieve lock
+		mux.Lock()
+
 		// lines 18-19
 		m.flushBufferIfStaleInfo()
 
@@ -175,6 +191,9 @@ func (m *UrbModule) DoForever() {
 		// line 29
 		m.gossip()
 
+		// release lock
+		mux.Unlock()
+
 		time.Sleep(time.Second * constants.ModuleRunSleepSeconds)
 	}
 }
@@ -190,12 +209,14 @@ func (m *UrbModule) flushBufferIfStaleInfo() {
 
 		// if empty message found, abort and flush
 		if r.Msg == nil {
+			log.Println("flushing buffer due to empty msg found")
 			flush = true
 			break
 		}
 
 		// if multiple record identifiers are found, abort and flush
 		if _, exists := identifiers[r.Identifier]; exists {
+			log.Printf("flushing buffer due to duplicate message identifier %v", r.Identifier)
 			flush = true
 			break
 		} else {
@@ -227,7 +248,15 @@ func (m *UrbModule) checkTransmitWindow() {
 	}
 
 	// check if should allow this node to send bufferUnitSize messages without considering receivers
-	if !(mS <= m.Seq && m.Seq <= mS+constants.BufferUnitSize && isSubset(s, s2)) {
+	seqBound := mS <= m.Seq && m.Seq <= (mS+constants.BufferUnitSize)
+	subSet := isSubset(s, s2)
+	if !(seqBound && subSet) {
+		if !seqBound {
+			log.Printf("setting all values in TxObsS to %d due to m.seq not being between mS (%d) and mS+bufferUnitSize (%d)", m.Seq, mS, mS+constants.BufferUnitSize)
+		} else if !subSet {
+			log.Printf("setting all values in TxObsS to %d due to seqnums ms+1..seq not in buffer", m.Seq)
+		}
+
 		for idx := range m.TxObsS {
 			m.TxObsS[idx] = m.Seq
 		}

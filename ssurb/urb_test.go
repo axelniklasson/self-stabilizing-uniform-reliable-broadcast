@@ -129,13 +129,13 @@ func TestCheckReceivingWindow(t *testing.T) {
 	mod.RxObsS[1] = 0
 	mod.RxObsS[2] = 10
 
-	mod.Buffer.Add(&BufferRecord{Msg: &UrbMessage{}, Identifier: Identifier{ID: 1, Seq: 20}})
-	mod.Buffer.Add(&BufferRecord{Msg: &UrbMessage{}, Identifier: Identifier{ID: 2, Seq: 500}})
+	mod.Buffer.Add(&BufferRecord{Msg: &UrbMessage{}, Identifier: Identifier{ID: 1, Seq: constants.BufferUnitSize}})
+	mod.Buffer.Add(&BufferRecord{Msg: &UrbMessage{}, Identifier: Identifier{ID: 2, Seq: constants.BufferUnitSize + 500}})
 	assert.Equal(t, mod.RxObsS[1], 0)
 	assert.Equal(t, mod.RxObsS[2], 10)
 	mod.checkReceivingWindow()
 	assert.Equal(t, mod.RxObsS[1], 0)
-	assert.Equal(t, mod.RxObsS[2], 500-constants.BufferUnitSize)
+	assert.Equal(t, mod.RxObsS[2], 500)
 }
 
 func TestUpdateReceiverCounters(t *testing.T) {
