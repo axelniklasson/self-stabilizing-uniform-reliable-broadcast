@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/constants"
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/models"
 )
 
 // HbfdModule models a HB failure detector
@@ -47,5 +48,6 @@ func (m *HbfdModule) onHeartbeat(senderID int) {
 
 // sendHeartbeat sends a heartbeat to another processor to indicate that this processor is alive
 func (m *HbfdModule) sendHeartbeat(receiverID int) {
-	return
+	message := models.Message{Type: models.HBFDheartbeat, Sender: m.ID, Data: nil}
+	go SendToProcessor(receiverID, &message)
 }

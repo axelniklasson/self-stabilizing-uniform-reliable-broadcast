@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/constants"
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/models"
 )
 
 // ThetafdModule models a theta failure detector
@@ -61,5 +62,6 @@ func (m *ThetafdModule) onHeartbeat(senderID int) {
 
 // sendHeartbeat sends a heartbeat to another processor to indicate that this processor is alive
 func (m *ThetafdModule) sendHeartbeat(receiverID int) {
-	return
+	message := models.Message{Type: models.THETAheartbeat, Sender: m.ID, Data: nil}
+	go SendToProcessor(receiverID, &message)
 }

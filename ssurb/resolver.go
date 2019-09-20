@@ -53,6 +53,8 @@ func (r *Resolver) UrbBroadcast(msg *UrbMessage) {
 // Dispatch routes an incoming message to the correct module
 func (r *Resolver) Dispatch(m *models.Message) {
 	urbModule := r.Modules[URB].(*UrbModule)
+	hbfdModule := r.Modules[HBFD].(*HbfdModule)
+	thetafdModule := r.Modules[THETAFD].(*ThetafdModule)
 
 	switch m.Type {
 	case models.MSG:
@@ -61,6 +63,10 @@ func (r *Resolver) Dispatch(m *models.Message) {
 		urbModule.onMSGack(m)
 	case models.GOSSIP:
 		urbModule.onGOSSIP(m)
+	case models.HBFDheartbeat:
+		hbfdModule.onHeartbeat(m.Sender)
+	case models.THETAheartbeat:
+		thetafdModule.onHeartbeat(m.Sender)
 	default:
 		log.Fatalf("Got unrecognized message %v", m)
 	}

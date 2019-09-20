@@ -79,11 +79,3 @@ func TestUpdate(t *testing.T) {
 	m2 := map[int]bool{0: true, 1: true, 5: true}
 	assert.Assert(t, reflect.DeepEqual(m, m2))
 }
-
-func TestUrbBroadcast(t *testing.T) {
-	// TODO
-}
-
-func TestUrbDeliver(t *testing.T) {
-	// TODO
-}
