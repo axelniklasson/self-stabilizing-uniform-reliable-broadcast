@@ -5,6 +5,11 @@
 BLUE='\033[1;34m'
 NO_COLOR='\033[0m'
 
+if [ $# -lt 3 ]; then
+    echo 1>&2 "$0: not enough arguments, run as ./scripts/start.sh NUMBER_OF_NODES ENV"
+    exit 2
+fi
+
 INSTANCE_COUNT=$1
 ENV=$2
 
