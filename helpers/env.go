@@ -25,9 +25,23 @@ func IsRunningOnTravis() bool {
 
 // GetIP returns the current IP address defined by IPEnvVar, if not set it returns ""
 func GetIP() string {
+	if IsDevEnv() {
+		return "127.0.0.1"
+	}
+
 	val, isSet := os.LookupEnv(constants.IPEnvVar)
 	if !isSet {
 		return ""
 	}
+
 	return val
+}
+
+// IsDevEnv returns true if env var is set to DEV
+func IsDevEnv() bool {
+	val, isSet := os.LookupEnv(constants.Env)
+	if !isSet {
+		return false
+	}
+	return val == "DEV"
 }

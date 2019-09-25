@@ -1,14 +1,14 @@
 # make sure to run this from the root of the project directory
 #
-# ./scripts/client.sh NODE_ID MSG_COUNT
+# ./scripts/client.sh HOST NODE_ID MSG_COUNT
 
-if [ $# -lt 2 ]; then
-    echo 1>&2 "$0: not enough arguments, run as ./scripts/client.sh NODE_ID MSG_COUNT"
+if [ $# -lt 3 ]; then
+    echo 1>&2 "$0: not enough arguments, run as ./scripts/client.sh HOST NODE_ID MSG_COUNT"
     exit 2
 fi
 
-NODE_ID=$1
-MSG_COUNT=$2
+HOST=$1
+NODE_ID=$2
+MSG_COUNT=$3
 PORT=$((4000+$NODE_ID))
-IP=$(curl ifconfig.me)
-curl -d '{"reqCount": '$MSG_COUNT'}' -H "Content-Type: application/json" -X POST http://$IP:$PORT/client/launch
+curl -d '{"reqCount": '$MSG_COUNT'}' -H "Content-Type: application/json" -X POST http://$HOST:$PORT/client/launch

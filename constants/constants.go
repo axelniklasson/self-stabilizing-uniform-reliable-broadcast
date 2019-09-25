@@ -28,3 +28,6 @@ const BufferUnitSize = 100
 
 // IPEnvVar is set to allow for the IP address to be used when binding API
 const IPEnvVar = "IP"
+
+// Env is used to control what env is currently launching the app
+const Env = "ENV"
