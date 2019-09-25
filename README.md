@@ -8,6 +8,7 @@ When that is done, run the following commands.
 ```
 cd $GOPATH/src/github.com && git clone https://github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast
 cd self-stabilizing-uniform-reliable-broadcast
+go get -u golang.org/x/lint/golint
 echo "go vet ./... && go list ./... | xargs -n 1 golint -set_exit_status && go test -v ./..." >> .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit scripts/*.sh
 dep ensure

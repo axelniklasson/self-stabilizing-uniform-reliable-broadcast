@@ -23,8 +23,9 @@ func IsRunningOnTravis() bool {
 	return isSet
 }
 
+// GetIP returns the current IP address defined by IPEnvVar, if not set it returns ""
 func GetIP() string {
-	val, isSet := os.LookupEnv(constants.IpEnvVar)
+	val, isSet := os.LookupEnv(constants.IPEnvVar)
 	if !isSet {
 		return ""
 	}
