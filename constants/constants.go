@@ -25,3 +25,6 @@ const TravisEnvVar = "TRAVIS_CI"
 
 // BufferUnitSize is used to control the number of messages allowed to be in the buffer for a processor
 const BufferUnitSize = 100
+
+// IpEnvVar is set to allow for the IP address to be used when binding API
+const IpEnvVar = "IP"

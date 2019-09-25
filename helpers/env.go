@@ -22,3 +22,11 @@ func IsRunningOnTravis() bool {
 	_, isSet := os.LookupEnv(constants.TravisEnvVar)
 	return isSet
 }
+
+func GetIP() string {
+	val, isSet := os.LookupEnv(constants.IpEnvVar)
+	if !isSet {
+		return ""
+	}
+	return val
+}

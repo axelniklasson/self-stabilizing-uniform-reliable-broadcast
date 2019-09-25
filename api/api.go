@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/ssurb"
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/helpers"
 
 	"github.com/gorilla/mux"
 )
@@ -57,6 +58,7 @@ func launchClient(w http.ResponseWriter, r *http.Request) {
 
 	go func(reqCount int) {
 		mod := resolver.GetUrbModule()
+		log.Println("Launching client")		
 
 		if reqCount != -1 {
 			for i := 0; i < reqCount; i++ {
@@ -78,6 +80,7 @@ func SetUp(id int, r *ssurb.Resolver) {
 
 	port := 4000 + id
 	resolver = r
+	ipString := helpers.GetIP()
 	log.Printf("Launching API on port %d", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), router))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", ipString, port), router))
 }
