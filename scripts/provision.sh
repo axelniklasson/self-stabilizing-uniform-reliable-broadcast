@@ -8,18 +8,22 @@ log () {
 	echo -e "${BLUE}Provision ==> $1${NO_COLOR}"
 }
 
+mkdir $HOME/go
+mkdir $HOME/go/src
+mkdir $HOME/go/bin
+
 install_go() {
     wget https://dl.google.com/go/go1.13.linux-amd64.tar.gz
     sudo tar -C /usr/local -xzf go1.13.linux-amd64.tar.gz
     echo "export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin" >> $HOME/.profile
     source $HOME/.profile
     rm -r go1.13.linux-amd64.tar.gz
-    mkdir $HOME/go
-    mkdir $HOME/go/src
+    log "go 1.13 installed"
 }
 
 install_dep() {
     curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+    log "dep installed"
 }
 
 if ! [ -x "$(command -v go)" ]; then

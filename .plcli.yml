@@ -2,5 +2,7 @@ bootstrap_cmds:
   - dep ensure
 env:
   ID: $PLCLI_INSTANCE_ID
+  ENV: PROD
+  IP: $(curl ifconfig.me)
 launch_cmds:
   - go run main.go
