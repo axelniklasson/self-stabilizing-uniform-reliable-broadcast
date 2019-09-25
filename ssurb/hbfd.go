@@ -37,7 +37,7 @@ func (m *HbfdModule) DoForever() {
 			}
 		}
 
-		time.Sleep(time.Second * constants.ModuleRunSleepSeconds)
+		time.Sleep(constants.ModuleRunSleepDuration)
 	}
 }
 

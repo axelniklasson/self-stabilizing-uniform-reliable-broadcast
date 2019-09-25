@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:a8d622a8049a4aa420e1c509873bb85d4c45c5107f420d922f919bfcb8d08694"
+  name = "github.com/beevik/ntp"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "62c80a04de2086884d8296004b6d74ee1846c582"
+  version = "v0.2.0"
+
+[[projects]]
   digest = "1:d6afaeed1502aa28e80a4ed0981d570ad91b2579193404256ce672ed0a609e0d"
   name = "github.com/beorn7/perks"
   packages = ["quantile"]
@@ -101,9 +109,25 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a0647c736587cdcd2af8299456875de45b91a8abd1211f421ebc6635a3f3c6fc"
+  digest = "1:08daaa2168271a8aa3b3a46d68d47b6413fc4eada093e2a98ed63779215a9e72"
+  name = "golang.org/x/net"
+  packages = [
+    "bpf",
+    "internal/iana",
+    "internal/socket",
+    "ipv4",
+  ]
+  pruneopts = "UT"
+  revision = "aa69164e4478b84860dc6769c710c699c67058a3"
+
+[[projects]]
+  branch = "master"
+  digest = "1:a5b091dde0eb21c5b964dd2495ef63d739874b8bc646ebaa590f6ab4f5b76dc3"
   name = "golang.org/x/sys"
-  packages = ["windows"]
+  packages = [
+    "unix",
+    "windows",
+  ]
   pruneopts = "UT"
   revision = "0c1ff786ef13daa914a3351c5e6b0321aed5960e"
 
@@ -125,6 +149,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/beevik/ntp",
     "github.com/gorilla/mux",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/prometheus/client_golang/prometheus/promauto",

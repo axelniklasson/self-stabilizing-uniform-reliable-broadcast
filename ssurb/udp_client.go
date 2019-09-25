@@ -27,8 +27,6 @@ func SendToProcessor(receiverID int, msg *models.Message) {
 func send(addr *net.UDPAddr, msg *models.Message) error {
 	// construct connection to server
 	conn, err := net.DialUDP("udp", nil, addr)
-
-	defer conn.Close()
 	if err != nil {
 		return err
 	}
@@ -44,6 +42,7 @@ func send(addr *net.UDPAddr, msg *models.Message) error {
 	if err != nil {
 		return err
 	}
+	conn.Close()
 
 	return nil
 }

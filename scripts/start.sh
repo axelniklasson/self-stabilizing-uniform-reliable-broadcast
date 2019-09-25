@@ -6,6 +6,7 @@ BLUE='\033[1;34m'
 NO_COLOR='\033[0m'
 
 INSTANCE_COUNT=$1
+CLIENT_REQS=$2
 
 log () {
 	echo -e "${BLUE}Launcher ==> $1${NO_COLOR}"
@@ -47,7 +48,7 @@ log "Starting $INSTANCE_COUNT node(s) locally"
 for (( i=0; i<=$(($INSTANCE_COUNT-1)); i++ ))
 do
     log "Starting node $i"
-    ID=$i go run main.go &
+    ID=$i CLIENT_REQS=$CLIENT_REQS go run main.go &
 done
 
 while true; do sleep 2; done
