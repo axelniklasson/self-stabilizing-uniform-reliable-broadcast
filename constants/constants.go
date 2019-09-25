@@ -9,9 +9,9 @@ const HostsFilePath = "./hosts.txt"
 const TestHostFilePath = "./test_hosts.txt"
 
 // ModuleRunSleepDuration is the duration each module sleeps before one iteration of the do forever loop
-const ModuleRunSleepDuration = 100 * time.Millisecond
+const ModuleRunSleepDuration = 250 * time.Millisecond
 
-// ThetafdW is the amount of messages considered
+// ThetafdW is the threshold used by the theta fd
 const ThetafdW = 10
 
 // ServerBufferSize is the size of the server buffer used when reading messages over the UDP socket

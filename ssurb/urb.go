@@ -158,7 +158,6 @@ func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 
 	m.Seq++
 	m.update(msg, m.ID, m.Seq, m.ID)
-	log.Printf("Broadcasted message \"%s\"", msg.Text)
 
 	// TODO use NTP time
 	// ts := helpers.GetNTPTime().UnixNano()
@@ -172,15 +171,12 @@ func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 
 // UrbDeliver delivers a message to the application layer
 func (m *UrbModule) UrbDeliver(msg *UrbMessage) {
-	log.Printf("Delivering message \"%s\"", msg.Text)
-
 	if !helpers.IsUnitTesting() && m.Metrics != nil {
 		if t1, exists := m.PendingMessages[msg]; exists {
 			// TODO use NTP time
 			// t2 := helpers.GetNTPTime().UnixNano()
 			t2 := time.Now().UnixNano()
 			deliveryTime := t2 - t1
-			log.Printf("Delivery time for msg %v: %d", msg, deliveryTime)
 			m.Metrics.MessageDeliveryTime.Set(float64(deliveryTime))
 		}
 
@@ -397,7 +393,10 @@ func (m *UrbModule) onMSG(msg *models.Message) {
 	j := int(msg.Data["j"].(float64))
 	s := int(msg.Data["s"].(float64))
 
+	mux.Lock()
 	m.update(&message, j, s, k)
+	mux.Unlock()
+
 	m.sendMSGack(k, j, s)
 }
 
@@ -405,7 +404,10 @@ func (m *UrbModule) onMSGack(msg *models.Message) {
 	k := msg.Sender
 	j := int(msg.Data["j"].(float64))
 	s := int(msg.Data["s"].(float64))
+
+	mux.Lock()
 	m.update(nil, j, s, k)
+	mux.Unlock()
 }
 
 func (m *UrbModule) onGOSSIP(msg *models.Message) {
@@ -414,9 +416,11 @@ func (m *UrbModule) onGOSSIP(msg *models.Message) {
 	txObsSJ := int(msg.Data["txObsSJ"].(float64))
 	rxObsSJ := int(msg.Data["rxObsSJ"].(float64))
 
+	mux.Lock()
 	m.Seq = max(seqJ, m.Seq)
 	m.TxObsS[j] = max(txObsSJ, m.TxObsS[j])
 	m.RxObsS[j] = max(rxObsSJ, m.RxObsS[j])
+	mux.Unlock()
 }
 
 // --- helper methods ---
