@@ -44,7 +44,7 @@ func (m *ThetafdModule) DoForever() {
 			}
 		}
 
-		time.Sleep(time.Second * constants.ModuleRunSleepSeconds)
+		time.Sleep(time.Second * 1)
 	}
 }
 

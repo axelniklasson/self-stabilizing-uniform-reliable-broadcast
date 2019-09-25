@@ -71,3 +71,9 @@ func (r *Resolver) Dispatch(m *models.Message) {
 		log.Fatalf("Got unrecognized message %v", m)
 	}
 }
+
+// GetUrbModule is used to get the current isntance of the urb module
+func (r *Resolver) GetUrbModule() *UrbModule {
+	urbModule := r.Modules[URB].(*UrbModule)
+	return urbModule
+}

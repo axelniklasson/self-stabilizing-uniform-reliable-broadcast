@@ -1,16 +1,13 @@
 # make sure to run this from the root of the project directory
 #
-# ./scripts/client.sh BROADCAST_ENDPOINT NUMBER_OF_MESSAGES
+# ./scripts/client.sh NODE_ID MSG_COUNT
 
 if [ $# -lt 2 ]; then
-    echo 1>&2 "$0: not enough arguments, run as ./scripts/client.sh BROADCAST_ENDPOINT NUMBER_OF_MESSAGES"
+    echo 1>&2 "$0: not enough arguments, run as ./scripts/client.sh NODE_ID MSG_COUNT"
     exit 2
 fi
 
-ENDPOINT=$1
+NODE_ID=$1
 MSG_COUNT=$2
-
-for (( i=0; i<=$(($MSG_COUNT-1)); i++ ))
-do
-    curl -d '{"text": "Message '$i'"}' -H "Content-Type: application/json" -X POST $ENDPOINT
-done
+PORT=$((5000+$NODE_ID))
+curl -d '{"reqCount": '$MSG_COUNT'}' -H "Content-Type: application/json" -X POST http://localhost:$PORT/client/launch

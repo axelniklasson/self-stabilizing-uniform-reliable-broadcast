@@ -22,8 +22,12 @@ type UrbMessage struct {
 }
 
 type urbMetrics struct {
+	// General
 	DeliveredMessagesCount prometheus.Counter
 	DeliveredByteCount     prometheus.Counter
+
+	// Throughput
+	MessageDeliveryTime prometheus.Gauge
 }
 
 // UrbModule models the URB algorithm in the paper
@@ -37,7 +41,9 @@ type UrbModule struct {
 	RxObsS []int
 	TxObsS []int
 
-	Metrics *urbMetrics
+	// Metrics stuff
+	Metrics         *urbMetrics
+	PendingMessages map[*UrbMessage]int64
 }
 
 // Init initializes the urb module
@@ -62,7 +68,12 @@ func (m *UrbModule) Init() {
 			Name: "urb_delivered_bytes_count",
 			Help: "The total number of delivered bytes",
 		}),
+		MessageDeliveryTime: promauto.NewGauge(prometheus.GaugeOpts{
+			Name: "urb_message_delivery_time",
+			Help: "Total time taken from broadcast to delivery of a message (throughput)",
+		}),
 	}
+	m.PendingMessages = map[*UrbMessage]int64{}
 }
 
 // obsolete is used to determine what records in the buffer are considered to be obsolete
@@ -132,33 +143,43 @@ func (m *UrbModule) update(msg *UrbMessage, j int, s int, k int) {
 }
 
 // UrbBroadcast is called from the application layer to broadcast a message
+// NOTE call this in a separate goroutine
 func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
-	go func(m *UrbModule) {
-		// grab lock
-		mux.Lock()
+	// grab lock
+	mux.Lock()
 
-		// busy-wait until flow control mechanism ensures enough space on all trusted receivers
-		for m.Seq >= m.minTxObsS()+constants.BufferUnitSize {
-			// release lock, sleep and grab it again before next check
-			mux.Unlock()
-			time.Sleep(time.Microsecond * 10)
-			mux.Lock()
-		}
-
-		m.Seq++
-		m.update(msg, m.ID, m.Seq, m.ID)
-		log.Printf("Broadcasted message \"%s\"", msg.Text)
-
-		// release lock
+	// busy-wait until flow control mechanism ensures enough space on all trusted receivers
+	for m.Seq >= m.minTxObsS()+constants.BufferUnitSize {
+		// release lock, sleep and grab it again before next check
 		mux.Unlock()
-	}(m)
+		time.Sleep(time.Nanosecond * 10)
+		mux.Lock()
+	}
+
+	m.Seq++
+	m.update(msg, m.ID, m.Seq, m.ID)
+
+	// TODO use NTP time
+	// ts := helpers.GetNTPTime().UnixNano()
+
+	ts := time.Now().UnixNano()
+	m.PendingMessages[msg] = ts
+
+	// release lock
+	mux.Unlock()
 }
 
 // UrbDeliver delivers a message to the application layer
 func (m *UrbModule) UrbDeliver(msg *UrbMessage) {
-	log.Printf("Delivering message \"%s\"", msg.Text)
-
 	if !helpers.IsUnitTesting() && m.Metrics != nil {
+		if t1, exists := m.PendingMessages[msg]; exists {
+			// TODO use NTP time
+			// t2 := helpers.GetNTPTime().UnixNano()
+			t2 := time.Now().UnixNano()
+			deliveryTime := t2 - t1
+			m.Metrics.MessageDeliveryTime.Set(float64(deliveryTime))
+		}
+
 		m.Metrics.DeliveredMessagesCount.Inc()
 		m.Metrics.DeliveredByteCount.Add(float64(len(msg.Text)))
 	}
@@ -194,7 +215,7 @@ func (m *UrbModule) DoForever() {
 		// release lock
 		mux.Unlock()
 
-		time.Sleep(time.Second * constants.ModuleRunSleepSeconds)
+		time.Sleep(constants.ModuleRunSleepDuration)
 	}
 }
 
@@ -372,7 +393,10 @@ func (m *UrbModule) onMSG(msg *models.Message) {
 	j := int(msg.Data["j"].(float64))
 	s := int(msg.Data["s"].(float64))
 
+	mux.Lock()
 	m.update(&message, j, s, k)
+	mux.Unlock()
+
 	m.sendMSGack(k, j, s)
 }
 
@@ -380,7 +404,10 @@ func (m *UrbModule) onMSGack(msg *models.Message) {
 	k := msg.Sender
 	j := int(msg.Data["j"].(float64))
 	s := int(msg.Data["s"].(float64))
+
+	mux.Lock()
 	m.update(nil, j, s, k)
+	mux.Unlock()
 }
 
 func (m *UrbModule) onGOSSIP(msg *models.Message) {
@@ -389,9 +416,11 @@ func (m *UrbModule) onGOSSIP(msg *models.Message) {
 	txObsSJ := int(msg.Data["txObsSJ"].(float64))
 	rxObsSJ := int(msg.Data["rxObsSJ"].(float64))
 
+	mux.Lock()
 	m.Seq = max(seqJ, m.Seq)
 	m.TxObsS[j] = max(txObsSJ, m.TxObsS[j])
 	m.RxObsS[j] = max(rxObsSJ, m.RxObsS[j])
+	mux.Unlock()
 }
 
 // --- helper methods ---

@@ -3,7 +3,6 @@ package ssurb
 import (
 	"time"
 
-	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/constants"
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/models"
 )
 
@@ -37,7 +36,7 @@ func (m *HbfdModule) DoForever() {
 			}
 		}
 
-		time.Sleep(time.Second * constants.ModuleRunSleepSeconds)
+		time.Sleep(time.Second * 1)
 	}
 }
 
