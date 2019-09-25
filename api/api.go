@@ -76,7 +76,7 @@ func SetUp(id int, r *ssurb.Resolver) {
 	router.HandleFunc("/client/launch", launchClient).Methods("POST")
 	router.HandleFunc("/broadcast", broadcast).Methods("POST")
 
-	port := 5000 + id
+	port := 4000 + id
 	resolver = r
 	log.Printf("Launching API on port %d", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), router))

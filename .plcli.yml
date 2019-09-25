@@ -1,0 +1,6 @@
+bootstrap_cmds:
+  - dep ensure
+env:
+  ID: $PLCLI_INSTANCE_ID
+launch_cmds:
+  - go run main.go

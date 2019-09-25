@@ -18,8 +18,18 @@ install_go() {
     mkdir $HOME/go/src
 }
 
+install_dep() {
+
+}
+
 if ! [ -x "$(command -v go)" ]; then
 	install_go
 else
 	log "go already installed, skipping"
+fi
+
+if ! [ -x "$(command -v dep)" ]; then
+	install_dep
+else
+	log "dep already installed, skipping"
 fi

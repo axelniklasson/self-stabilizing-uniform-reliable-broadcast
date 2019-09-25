@@ -9,5 +9,5 @@ fi
 
 NODE_ID=$1
 MSG_COUNT=$2
-PORT=$((5000+$NODE_ID))
+PORT=$((4000+$NODE_ID))
 curl -d '{"reqCount": '$MSG_COUNT'}' -H "Content-Type: application/json" -X POST http://localhost:$PORT/client/launch
