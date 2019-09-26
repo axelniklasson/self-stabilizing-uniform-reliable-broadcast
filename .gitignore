@@ -1,5 +1,6 @@
 .DS_Store
-hosts.txt
+hosts*
 heimdall
 node_exporter
 self-stabilizing-uniform-reliable-broadcast
+logs

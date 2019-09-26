@@ -1,9 +1,9 @@
 # make sure to run this from the root of the project directory
 #
-# ./scripts/client.sh HOST NODE_ID MSG_COUNT
+# ./scripts/client_single.sh HOST NODE_ID MSG_COUNT
 
 if [ $# -lt 3 ]; then
-    echo 1>&2 "$0: not enough arguments, run as ./scripts/client.sh HOST NODE_ID MSG_COUNT"
+    echo 1>&2 "$0: not enough arguments, run as ./scripts/client_single.sh HOST NODE_ID MSG_COUNT"
     exit 2
 fi
 

@@ -1,14 +1,10 @@
 # make sure to run this from the root of the project directory
 #
-# ./scripts/deploy.sh NUMBER_OF_NODES
+# ./scripts/deploy.sh NODE_COUNT GIT_BRANCH
 
-BLUE='\033[1;34m'
-NO_COLOR='\033[0m'
+if [ $# -lt 2 ]; then
+    echo 1>&2 "$0: not enough arguments, run as ./scripts/deploy.sh NODE_COUNT GIT_BRANCH"
+    exit 2
+fi
 
-NODE_COUNT=$1
-
-log () {
-	echo -e "${BLUE}Deployment ==> $1${NO_COLOR}"
-}
-
-log "Provisioning nodes"
+plcli --node-count $1 --git-branch $2 --app-path \$HOME/go/src/github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast --prometheus-sd-path ./heimdall/prometheus/sd.json --node-exporter deploy https://github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast.git
