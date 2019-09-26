@@ -1,17 +1,16 @@
 # make sure to run this from the root of the project directory
 #
-# ./scripts/start.sh NUMBER_OF_NODES ENV
+# ./scripts/start.sh NUMBER_OF_NODES
 
 BLUE='\033[1;34m'
 NO_COLOR='\033[0m'
 
-if [ $# -lt 2 ]; then
-    echo 1>&2 "$0: not enough arguments, run as ./scripts/start.sh NUMBER_OF_NODES ENV"
+if [ $# -lt 1 ]; then
+    echo 1>&2 "$0: not enough arguments, run as ./scripts/start.sh NUMBER_OF_NODES"
     exit 2
 fi
 
 INSTANCE_COUNT=$1
-ENV=$2
 
 log () {
 	echo -e "${BLUE}Launcher ==> $1${NO_COLOR}"
@@ -23,12 +22,7 @@ rm -rf logs/*.txt
 log "Creating hosts.txt"
 rm -rf hosts.txt
 touch hosts.txt
-
-if [ $ENV == "DEV" ]; then
-    IP=127.0.0.1
-else
-    IP=$(curl ifconfig.me)
-fi
+IP=127.0.0.1
 
 PROM_ENDPOINTS=()
 for (( i=0; i<=$(($INSTANCE_COUNT-1)); i++ ))
@@ -59,7 +53,7 @@ log "Starting $INSTANCE_COUNT node(s) locally"
 for (( i=0; i<=$(($INSTANCE_COUNT-1)); i++ ))
 do
     log "Starting node $i"
-    ID=$i IP=$IP ENV=$ENV go run main.go &
+    ID=$i IP=$IP ENV="DEV" go run main.go &
 done
 
 while true; do sleep 2; done

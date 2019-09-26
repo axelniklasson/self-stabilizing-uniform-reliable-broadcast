@@ -310,7 +310,7 @@ func (m *UrbModule) trimBuffer() {
 
 	for _, r := range m.Buffer.Records {
 		if r.Identifier.ID == m.ID {
-			if m.minTxObsS() < r.Identifier.Seq {
+			if m.minTxObsS() <= r.Identifier.Seq {
 				newBuffer.Add(r)
 			}
 		} else {
