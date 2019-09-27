@@ -23,8 +23,9 @@ type UrbMessage struct {
 
 type urbMetrics struct {
 	// General
-	DeliveredMessagesCount prometheus.Counter
-	DeliveredByteCount     prometheus.Counter
+	BroadcastedMessagesCount prometheus.Counter
+	DeliveredMessagesCount   prometheus.Counter
+	DeliveredByteCount       prometheus.Counter
 
 	// Throughput
 	MessageDeliveryTime prometheus.Gauge
@@ -60,6 +61,10 @@ func (m *UrbModule) Init() {
 
 	// init metrics
 	m.Metrics = &urbMetrics{
+		BroadcastedMessagesCount: promauto.NewCounter(prometheus.CounterOpts{
+			Name: "urb_broadcasted_messages_count",
+			Help: "The total number of broadcasted messages",
+		}),
 		DeliveredMessagesCount: promauto.NewCounter(prometheus.CounterOpts{
 			Name: "urb_delivered_messages_count",
 			Help: "The total number of delivered messages",
@@ -164,6 +169,9 @@ func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 
 	ts := time.Now().UnixNano()
 	m.PendingMessages[msg] = ts
+
+	// emit metric that msg was broadcasted
+	m.Metrics.BroadcastedMessagesCount.Inc()
 
 	// release lock
 	mux.Unlock()
@@ -310,7 +318,7 @@ func (m *UrbModule) trimBuffer() {
 
 	for _, r := range m.Buffer.Records {
 		if r.Identifier.ID == m.ID {
-			if m.minTxObsS() <= r.Identifier.Seq {
+			if m.minTxObsS() < r.Identifier.Seq {
 				newBuffer.Add(r)
 			}
 		} else {
