@@ -4,10 +4,33 @@ import (
 	"log"
 	"net"
 
+	"github.com/prometheus/client_golang/prometheus/promauto"
+
+	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/helpers"
 
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/models"
 )
+
+type clientMetrics struct {
+	ConnError  string
+	PackError  string
+	WriteError string
+
+	ErrorCount *prometheus.CounterVec
+}
+
+var metrics = &clientMetrics{
+	ConnError:  "conn_error",
+	PackError:  "pack_error",
+	WriteError: "write_error",
+
+	ErrorCount: promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "udp_client_error_count",
+		Help: "The amount of errors emitted by the udp client",
+	}, []string{"error_type"}),
+}
 
 // SendToProcessor is a wrapper around send, intended to be called from modules
 func SendToProcessor(receiverID int, msg *models.Message) {
@@ -28,18 +51,21 @@ func send(addr *net.UDPAddr, msg *models.Message) error {
 	// construct connection to server
 	conn, err := net.DialUDP("udp", nil, addr)
 	if err != nil {
+		metrics.ErrorCount.WithLabelValues(metrics.ConnError).Inc()
 		return err
 	}
 
 	// prepare payload
 	payload, err := helpers.Pack(msg)
 	if err != nil {
+		metrics.ErrorCount.WithLabelValues(metrics.PackError).Inc()
 		return err
 	}
 
 	// write payload over socket
 	_, err = conn.Write(payload)
 	if err != nil {
+		metrics.ErrorCount.WithLabelValues(metrics.WriteError).Inc()
 		return err
 	}
 	conn.Close()
