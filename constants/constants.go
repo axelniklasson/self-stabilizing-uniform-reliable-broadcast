@@ -12,7 +12,7 @@ const TestHostFilePath = "./test_hosts.txt"
 const ModuleRunSleepDuration = 150 * time.Millisecond
 
 // ThetafdW is the threshold used by the theta fd
-const ThetafdW = 10
+const ThetafdW = 100
 
 // ServerBufferSize is the size of the server buffer used when reading messages over the UDP socket
 const ServerBufferSize = 1024
