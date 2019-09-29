@@ -9,7 +9,7 @@ const HostsFilePath = "./hosts.txt"
 const TestHostFilePath = "./test_hosts.txt"
 
 // ModuleRunSleepDuration is the duration each module sleeps before one iteration of the do forever loop
-const ModuleRunSleepDuration = 150 * time.Millisecond
+const ModuleRunSleepDuration = 250 * time.Millisecond
 
 // ThetafdW is the threshold used by the theta fd
 const ThetafdW = 100
