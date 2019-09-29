@@ -27,6 +27,16 @@ install_dep() {
     log "dep installed"
 }
 
+install_git() {
+    sudo yum install git -y
+}
+
+if ! [ -x "$(command -v git)" ]; then
+	install_git
+else
+	log "git already installed, skipping"
+fi
+
 if ! [ -x "$(command -v go)" ]; then
 	install_go
 else

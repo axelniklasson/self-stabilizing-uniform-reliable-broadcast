@@ -22,6 +22,7 @@ type clientMetrics struct {
 	FatalSendError string
 
 	ErrorCount *prometheus.CounterVec
+	MsgCount   *prometheus.CounterVec
 }
 
 var metrics = &clientMetrics{
@@ -34,6 +35,10 @@ var metrics = &clientMetrics{
 		Name: "udp_client_error_count",
 		Help: "The amount of errors emitted by the udp client",
 	}, []string{"error_type", "receiver_id"}),
+	MsgCount: promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "udp_client_msg_count",
+		Help: "The amount messages sent by this client",
+	}, []string{"receiver_id"}),
 }
 
 // SendToProcessor is a wrapper around send, intended to be called from modules
@@ -55,6 +60,7 @@ func SendToProcessor(receiverID int, msg *models.Message) {
 			log.Printf("Got error when sending %v to %d: %v, retrying..", msg, receiverID, err)
 			time.Sleep(time.Millisecond * 10)
 		} else {
+			metrics.MsgCount.WithLabelValues(strconv.Itoa(receiverID)).Inc()
 			sent = true
 		}
 	}

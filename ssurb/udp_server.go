@@ -3,6 +3,7 @@ package ssurb
 import (
 	"log"
 	"net"
+	"strconv"
 
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/constants"
 	"github.com/prometheus/client_golang/prometheus"
@@ -18,6 +19,7 @@ type serverMetrics struct {
 	UnpackError   string
 
 	ErrorCount *prometheus.CounterVec
+	MsgCount   *prometheus.CounterVec
 }
 
 // Server models a server that listens on IP:Port for UDP packets
@@ -43,6 +45,10 @@ func (s *Server) Start() error {
 			Name: "udp_server_error_count",
 			Help: "The amount of errors emitted by the udp server",
 		}, []string{"error_type"}),
+		MsgCount: promauto.NewCounterVec(prometheus.CounterOpts{
+			Name: "udp_server_msg_count",
+			Help: "The amount messages received by this server",
+		}, []string{"sender_id"}),
 	}
 
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: s.IP, Port: s.Port})
@@ -80,6 +86,7 @@ func (s *Server) Listen() error {
 			s.Metrics.ErrorCount.WithLabelValues(s.Metrics.UnpackError).Inc()
 			log.Printf("Could not unpack message. Got error: %v\n", err)
 		} else {
+			s.Metrics.MsgCount.WithLabelValues(strconv.Itoa(msg.Sender)).Inc()
 			s.Resolver.Dispatch(msg)
 		}
 	}
