@@ -54,6 +54,7 @@ func TestMinTxObsS(t *testing.T) {
 	resolver.TrustedRet = []int{1, 3, 5}
 
 	// should return 2, since mod.TxObsS[1] is smallest value for x, x part of resolver.TrustedRet
+	// TODO fix me
 	// assert.Equal(t, mod.minTxObsS(), 2)
 }
 

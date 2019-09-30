@@ -341,7 +341,7 @@ func (m *UrbModule) trimBuffer() {
 			if m.minTxObsS() < r.Identifier.Seq {
 				newBuffer.Add(r)
 			} else {
-				// log.Printf("removed own msg from buffer since its seq (%d) >= minTxObsS (%d)", r.Identifier.Seq, m.minTxObsS())
+				log.Printf("removed own msg from buffer since its seq (%d) >= minTxObsS (%d)", r.Identifier.Seq, m.minTxObsS())
 			}
 		} else {
 			k := r.Identifier.ID
