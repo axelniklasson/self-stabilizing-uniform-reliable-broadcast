@@ -60,6 +60,7 @@ func launchClient(w http.ResponseWriter, r *http.Request) {
 		mod := resolver.GetUrbModule()
 		log.Println("Launching client")
 
+		// TODO look into optimising this one
 		if reqCount != -1 {
 			for i := 0; i < reqCount; i++ {
 				mod.BlockUntilAvailableSpace()
