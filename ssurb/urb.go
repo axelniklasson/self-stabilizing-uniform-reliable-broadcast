@@ -338,11 +338,9 @@ func (m *UrbModule) trimBuffer() {
 
 	for _, r := range m.Buffer.Records {
 		if r.Identifier.ID == m.ID {
-			// if m.minTxObsS() < r.Identifier.Seq {
-			newBuffer.Add(r)
-			// } else {
-			// 	log.Printf("removed own msg from buffer since its seq (%d) >= minTxObsS (%d)", r.Identifier.Seq, m.minTxObsS())
-			// }
+			if m.minTxObsS() < r.Identifier.Seq {
+				newBuffer.Add(r)
+			}
 		} else {
 			k := r.Identifier.ID
 			s := r.Identifier.Seq
@@ -361,10 +359,6 @@ func (m *UrbModule) processMessages() {
 	for _, r := range m.Buffer.Records {
 		if !r.Delivered && isSubset(trusted, r.RecBy) {
 			m.UrbDeliver(r.Msg, r.Identifier.ID)
-
-			// if r.Identifier.ID == m.ID {
-			// 	m.TxObsS[m.ID]++
-			// }
 		}
 		r.Delivered = r.Delivered || isSubset(trusted, r.RecBy)
 
@@ -381,9 +375,7 @@ func (m *UrbModule) processMessages() {
 // gossip sends control info about max seq that pi stores for pk as well as info about max obsolete record for pk
 func (m *UrbModule) gossip() {
 	for _, k := range m.P {
-		// if k != m.ID {
 		m.sendGOSSIP(k, m.maxSeq(k), m.RxObsS[k], m.TxObsS[k])
-		// }
 	}
 }
 
@@ -412,13 +404,17 @@ func (m *UrbModule) sendMSGack(receiverID int, j int, s int) {
 
 func (m *UrbModule) sendGOSSIP(receiverID int, seqJ int, txObsSJ int, rxObsSJ int) {
 	data := map[string]interface{}{
-		"seqJ":    seqJ,
-		"txObsSJ": txObsSJ,
-		"rxObsSJ": rxObsSJ,
+		"seqJ":    float64(seqJ),
+		"txObsSJ": float64(txObsSJ),
+		"rxObsSJ": float64(rxObsSJ),
 	}
 
 	message := models.Message{Type: models.GOSSIP, Sender: m.ID, Data: data}
-	go SendToProcessor(receiverID, &message)
+	if receiverID == m.ID {
+		go m.onGOSSIP(&message)
+	} else {
+		go SendToProcessor(receiverID, &message)
+	}
 }
 
 func (m *UrbModule) onMSG(msg *models.Message) {
