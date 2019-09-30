@@ -340,6 +340,8 @@ func (m *UrbModule) trimBuffer() {
 		if r.Identifier.ID == m.ID {
 			if m.minTxObsS() < r.Identifier.Seq {
 				newBuffer.Add(r)
+			} else {
+				log.Printf("removed msg %v from buffer since minTxObs (%d) >= seq (%d)", r.Msg, m.minTxObsS(), r.Identifier.Seq)
 			}
 		} else {
 			k := r.Identifier.ID
