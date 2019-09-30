@@ -114,7 +114,7 @@ func (m *UrbModule) maxSeq(k int) int {
 // BlockUntilAvailableSpace busy-waits until flow control mechanism ensures enough space on all trusted receivers
 func (m *UrbModule) BlockUntilAvailableSpace() {
 	for m.Seq >= m.minTxObsS()+constants.BufferUnitSize {
-		time.Sleep(time.Millisecond * 10)
+		time.Sleep(time.Millisecond * 5)
 	}
 }
 
@@ -413,6 +413,7 @@ func (m *UrbModule) sendGOSSIP(receiverID int, seqJ int, txObsSJ int, rxObsSJ in
 
 	message := models.Message{Type: models.GOSSIP, Sender: m.ID, Data: data}
 	if receiverID == m.ID {
+		// deliver directly if sending to self
 		go m.onGOSSIP(&message)
 	} else {
 		go SendToProcessor(receiverID, &message)
