@@ -180,7 +180,7 @@ func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 	// emit metric that msg was broadcasted
 	m.Metrics.BroadcastedMessagesCount.Inc()
 
-	log.Printf("broadcasted msg %v", msg)
+	// log.Printf("broadcasted msg %v", msg)
 
 	// release lock
 	mux.Unlock()
@@ -199,7 +199,7 @@ func (m *UrbModule) UrbDeliver(msg *UrbMessage) {
 
 		m.Metrics.DeliveredMessagesCount.Inc()
 		m.Metrics.DeliveredByteCount.Add(float64(len(msg.Text)))
-		log.Printf("delivered msg %v", msg)
+		// log.Printf("delivered msg %v", msg)
 	}
 }
 
