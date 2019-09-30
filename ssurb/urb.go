@@ -203,7 +203,7 @@ func (m *UrbModule) UrbDeliver(msg *UrbMessage, id int) {
 		m.Metrics.DeliveredMessagesCount.Inc()
 		m.Metrics.DeliveredByteCount.Add(float64(len(msg.Text)))
 		m.DeliveredByProcessor[id]++
-		log.Printf("DeliveredByProcessor: %v", m.DeliveredByProcessor)
+		log.Printf("DeliveredByProcessor: %v. buffer length: %d", m.DeliveredByProcessor, len(m.Buffer.Records))
 		// log.Printf("delivered msg %v", msg)
 	}
 }
@@ -334,7 +334,7 @@ func (m *UrbModule) trimBuffer() {
 
 	for _, r := range m.Buffer.Records {
 		if r.Identifier.ID == m.ID {
-			if m.minTxObsS() < r.Identifier.Seq {
+			if m.minTxObsS() <= r.Identifier.Seq {
 				newBuffer.Add(r)
 			}
 		} else {
