@@ -269,6 +269,7 @@ func (m *UrbModule) flushBufferIfStaleInfo() {
 	}
 
 	if flush {
+		log.Printf("buffer flushed")
 		m.Buffer.Records = []*BufferRecord{}
 	}
 }
@@ -339,8 +340,7 @@ func (m *UrbModule) trimBuffer() {
 		} else {
 			k := r.Identifier.ID
 			s := r.Identifier.Seq
-			// if contains(m.P, k) && m.RxObsS[k] < s && m.maxSeq(k)-constants.BufferUnitSize <= s {
-			if contains(m.P, k) && m.RxObsS[k] < s {
+			if contains(m.P, k) && m.RxObsS[k] < s && m.maxSeq(k)-constants.BufferUnitSize <= s {
 				newBuffer.Add(r)
 			}
 		}
