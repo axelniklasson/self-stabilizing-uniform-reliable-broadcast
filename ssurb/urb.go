@@ -128,9 +128,9 @@ func (m *UrbModule) minTxObsS() int {
 		}
 	}
 
-	// if m.TxObsS[m.ID] < min {
-	// 	min = m.TxObsS[m.ID]
-	// }
+	if m.TxObsS[m.ID] < min {
+		min = m.TxObsS[m.ID]
+	}
 
 	return min
 }
