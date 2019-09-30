@@ -128,6 +128,10 @@ func (m *UrbModule) minTxObsS() int {
 		}
 	}
 
+	if m.TxObsS[m.ID] < min {
+		min = m.TxObsS[m.ID]
+	}
+
 	return min
 }
 
@@ -203,7 +207,6 @@ func (m *UrbModule) UrbDeliver(msg *UrbMessage, id int) {
 		m.Metrics.DeliveredMessagesCount.Inc()
 		m.Metrics.DeliveredByteCount.Add(float64(len(msg.Text)))
 		m.DeliveredByProcessor[id]++
-		log.Printf("DeliveredByProcessor: %v. buffer length: %d", m.DeliveredByProcessor, len(m.Buffer.Records))
 		// log.Printf("delivered msg %v", msg)
 	}
 }
@@ -239,6 +242,7 @@ func (m *UrbModule) DoForever() {
 		mux.Unlock()
 
 		time.Sleep(constants.ModuleRunSleepDuration)
+		log.Printf("DeliveredByProcessor: %v. txObs: %v, rxObs: %v", m.DeliveredByProcessor, m.TxObsS, m.RxObsS)
 	}
 }
 
@@ -334,8 +338,10 @@ func (m *UrbModule) trimBuffer() {
 
 	for _, r := range m.Buffer.Records {
 		if r.Identifier.ID == m.ID {
-			if m.minTxObsS() <= r.Identifier.Seq {
+			if m.minTxObsS() < r.Identifier.Seq {
 				newBuffer.Add(r)
+			} else {
+				// log.Printf("removed own msg from buffer since its seq (%d) >= minTxObsS (%d)", r.Identifier.Seq, m.minTxObsS())
 			}
 		} else {
 			k := r.Identifier.ID
@@ -355,6 +361,10 @@ func (m *UrbModule) processMessages() {
 	for _, r := range m.Buffer.Records {
 		if !r.Delivered && isSubset(trusted, r.RecBy) {
 			m.UrbDeliver(r.Msg, r.Identifier.ID)
+
+			if r.Identifier.ID == m.ID {
+				m.TxObsS[m.ID]++
+			}
 		}
 		r.Delivered = r.Delivered || isSubset(trusted, r.RecBy)
 
