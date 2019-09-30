@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/ssurb"
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/helpers"
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/ssurb"
 
 	"github.com/gorilla/mux"
 )
@@ -58,10 +58,11 @@ func launchClient(w http.ResponseWriter, r *http.Request) {
 
 	go func(reqCount int) {
 		mod := resolver.GetUrbModule()
-		log.Println("Launching client")		
+		log.Println("Launching client")
 
 		if reqCount != -1 {
 			for i := 0; i < reqCount; i++ {
+				mod.BlockUntilAvailableSpace()
 				mod.UrbBroadcast(&ssurb.UrbMessage{Text: fmt.Sprintf("Message %d_%d", mod.ID, i)})
 			}
 		}

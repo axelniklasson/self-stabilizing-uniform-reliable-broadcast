@@ -108,6 +108,13 @@ func (m *UrbModule) maxSeq(k int) int {
 	return max
 }
 
+// BlockUntilAvailableSpace busy-waits until flow control mechanism ensures enough space on all trusted receivers
+func (m *UrbModule) BlockUntilAvailableSpace() {
+	for m.Seq >= m.minTxObsS()+constants.BufferUnitSize {
+		time.Sleep(time.Millisecond * 10)
+	}
+}
+
 // minTxObsS returns the smallest obsolete sequence number that pi had received from a trusted receiver
 func (m *UrbModule) minTxObsS() int {
 	trusted := m.Resolver.Trusted()
@@ -154,12 +161,12 @@ func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 	mux.Lock()
 
 	// busy-wait until flow control mechanism ensures enough space on all trusted receivers
-	for m.Seq >= m.minTxObsS()+constants.BufferUnitSize {
-		// release lock, sleep and grab it again before next check
-		mux.Unlock()
-		time.Sleep(time.Nanosecond * 10)
-		mux.Lock()
-	}
+	// for m.Seq >= m.minTxObsS()+constants.BufferUnitSize {
+	// 	// release lock, sleep and grab it again before next check
+	// 	mux.Unlock()
+	// 	time.Sleep(time.Millisecond * 20)
+	// 	mux.Lock()
+	// }
 
 	m.Seq++
 	m.update(msg, m.ID, m.Seq, m.ID)
@@ -172,6 +179,8 @@ func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 
 	// emit metric that msg was broadcasted
 	m.Metrics.BroadcastedMessagesCount.Inc()
+
+	log.Printf("broadcasted msg %v", msg)
 
 	// release lock
 	mux.Unlock()
@@ -190,6 +199,7 @@ func (m *UrbModule) UrbDeliver(msg *UrbMessage) {
 
 		m.Metrics.DeliveredMessagesCount.Inc()
 		m.Metrics.DeliveredByteCount.Add(float64(len(msg.Text)))
+		log.Printf("delivered msg %v", msg)
 	}
 }
 

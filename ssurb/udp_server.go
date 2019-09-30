@@ -66,9 +66,9 @@ func (s *Server) Start() error {
 // Listen tells the server to start listening for packets on IP:PORT
 func (s *Server) Listen() error {
 	defer s.Conn.Close()
-	buf := make([]byte, constants.ServerBufferSize)
 
 	for {
+		buf := make([]byte, constants.ServerBufferSize)
 		n, _, err := s.Conn.ReadFromUDP(buf)
 
 		if err != nil {
@@ -79,15 +79,18 @@ func (s *Server) Listen() error {
 			log.Fatalf("Got oversized message of size %d, max is %d", n, constants.ServerBufferSize)
 		}
 
-		s.Count++
-		bytes := buf[0:n]
-		msg, err := helpers.Unpack(bytes)
-		if err != nil {
-			s.Metrics.ErrorCount.WithLabelValues(s.Metrics.UnpackError).Inc()
-			log.Printf("Could not unpack message. Got error: %v\n", err)
-		} else {
-			s.Metrics.MsgCount.WithLabelValues(strconv.Itoa(msg.Sender)).Inc()
-			s.Resolver.Dispatch(msg)
-		}
+		// handle message in other goroutine and serve next client
+		go func(s *Server, bytes []byte) {
+			s.Count++
+
+			msg, err := helpers.Unpack(bytes)
+			if err != nil {
+				s.Metrics.ErrorCount.WithLabelValues(s.Metrics.UnpackError).Inc()
+				log.Printf("Could not unpack message. Got error: %v\n", err)
+			} else {
+				s.Metrics.MsgCount.WithLabelValues(strconv.Itoa(msg.Sender)).Inc()
+				s.Resolver.Dispatch(msg)
+			}
+		}(s, buf[0:n])
 	}
 }
