@@ -334,7 +334,8 @@ func (m *UrbModule) trimBuffer() {
 		} else {
 			k := r.Identifier.ID
 			s := r.Identifier.Seq
-			if contains(m.P, k) && m.RxObsS[k] < s && m.maxSeq(k)-constants.BufferUnitSize <= s {
+			// if contains(m.P, k) && m.RxObsS[k] < s && m.maxSeq(k)-constants.BufferUnitSize <= s {
+			if contains(m.P, k) && m.RxObsS[k] < s {
 				newBuffer.Add(r)
 			}
 		}
