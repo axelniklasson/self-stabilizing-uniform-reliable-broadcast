@@ -33,10 +33,9 @@ type urbMetrics struct {
 
 // UrbModule models the URB algorithm in the paper
 type UrbModule struct {
-	ID                   int
-	P                    []int
-	Resolver             IResolver
-	DeliveredByProcessor []int
+	ID       int
+	P        []int
+	Resolver IResolver
 
 	Seq    int
 	Buffer *Buffer
@@ -54,12 +53,10 @@ func (m *UrbModule) Init() {
 	m.Buffer = &Buffer{Records: []*BufferRecord{}}
 	m.RxObsS = []int{}
 	m.TxObsS = []int{}
-	m.DeliveredByProcessor = []int{}
 
 	for i := 0; i < len(m.P); i++ {
 		m.RxObsS = append(m.RxObsS, -1)
 		m.TxObsS = append(m.TxObsS, -1)
-		m.DeliveredByProcessor = append(m.DeliveredByProcessor, 0)
 	}
 
 	// init metrics
@@ -206,8 +203,6 @@ func (m *UrbModule) UrbDeliver(msg *UrbMessage, id int) {
 
 		m.Metrics.DeliveredMessagesCount.Inc()
 		m.Metrics.DeliveredByteCount.Add(float64(len(msg.Text)))
-		m.DeliveredByProcessor[id]++
-		// log.Printf("delivered msg %v", msg)
 	}
 }
 
@@ -242,7 +237,6 @@ func (m *UrbModule) DoForever() {
 		mux.Unlock()
 
 		time.Sleep(constants.ModuleRunSleepDuration)
-		log.Printf("DeliveredByProcessor: %v. txObs: %v, rxObs: %v, bufferlen: %d", m.DeliveredByProcessor, m.TxObsS, m.RxObsS, len(m.Buffer.Records))
 	}
 }
 
@@ -251,7 +245,6 @@ func (m *UrbModule) flushBufferIfStaleInfo() {
 	identifiers := map[Identifier]bool{}
 	flush := false
 
-	// go through all records
 	// lines 18-19
 	for _, r := range m.Buffer.Records {
 
@@ -273,7 +266,6 @@ func (m *UrbModule) flushBufferIfStaleInfo() {
 	}
 
 	if flush {
-		log.Printf("buffer flushed")
 		m.Buffer.Records = []*BufferRecord{}
 	}
 }

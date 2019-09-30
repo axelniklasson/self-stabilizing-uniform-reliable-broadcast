@@ -42,7 +42,7 @@ func (m *ThetafdModule) Init() {
 func (m *ThetafdModule) Trusted() []int {
 	trusted := []int{}
 	for idx, x := range m.Vector {
-		if x < constants.ThetafdW && idx != m.ID {
+		if x < constants.ThetafdW {
 			trusted = append(trusted, idx)
 		}
 	}
