@@ -242,7 +242,7 @@ func (m *UrbModule) DoForever() {
 		mux.Unlock()
 
 		time.Sleep(constants.ModuleRunSleepDuration)
-		log.Printf("DeliveredByProcessor: %v. txObs: %v, rxObs: %v", m.DeliveredByProcessor, m.TxObsS, m.RxObsS)
+		log.Printf("DeliveredByProcessor: %v. txObs: %v, rxObs: %v, bufferlen: %d", m.DeliveredByProcessor, m.TxObsS, m.RxObsS, len(m.Buffer.Records))
 	}
 }
 
