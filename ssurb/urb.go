@@ -33,9 +33,10 @@ type urbMetrics struct {
 
 // UrbModule models the URB algorithm in the paper
 type UrbModule struct {
-	ID       int
-	P        []int
-	Resolver IResolver
+	ID                   int
+	P                    []int
+	Resolver             IResolver
+	DeliveredByProcessor []int
 
 	Seq    int
 	Buffer *Buffer
@@ -53,10 +54,12 @@ func (m *UrbModule) Init() {
 	m.Buffer = &Buffer{Records: []*BufferRecord{}}
 	m.RxObsS = []int{}
 	m.TxObsS = []int{}
+	m.DeliveredByProcessor = []int{}
 
 	for i := 0; i < len(m.P); i++ {
 		m.RxObsS = append(m.RxObsS, -1)
 		m.TxObsS = append(m.TxObsS, -1)
+		m.DeliveredByProcessor = append(m.DeliveredByProcessor, 0)
 	}
 
 	// init metrics
@@ -187,7 +190,7 @@ func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 }
 
 // UrbDeliver delivers a message to the application layer
-func (m *UrbModule) UrbDeliver(msg *UrbMessage) {
+func (m *UrbModule) UrbDeliver(msg *UrbMessage, id int) {
 	if !helpers.IsUnitTesting() && m.Metrics != nil {
 		if t1, exists := m.PendingMessages[msg]; exists {
 			// TODO use NTP time
@@ -199,6 +202,8 @@ func (m *UrbModule) UrbDeliver(msg *UrbMessage) {
 
 		m.Metrics.DeliveredMessagesCount.Inc()
 		m.Metrics.DeliveredByteCount.Add(float64(len(msg.Text)))
+		m.DeliveredByProcessor[id]++
+		log.Printf("DeliveredByProcessor: %v", m.DeliveredByProcessor)
 		// log.Printf("delivered msg %v", msg)
 	}
 }
@@ -349,7 +354,7 @@ func (m *UrbModule) processMessages() {
 	trusted := listToMap(m.Resolver.Trusted())
 	for _, r := range m.Buffer.Records {
 		if !r.Delivered && isSubset(trusted, r.RecBy) {
-			m.UrbDeliver(r.Msg)
+			m.UrbDeliver(r.Msg, r.Identifier.ID)
 		}
 		r.Delivered = r.Delivered || isSubset(trusted, r.RecBy)
 
