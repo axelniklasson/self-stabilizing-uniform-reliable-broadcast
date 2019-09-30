@@ -66,7 +66,8 @@ func main() {
 	var wg sync.WaitGroup
 
 	// setup communication
-	server := ssurb.Server{IP: []byte{127, 0, 0, 1}, Port: 4000 + id, Resolver: &resolver}
+	ip := helpers.IPStringToSlice(helpers.GetIP())
+	server := ssurb.Server{IP: ip, Port: 4000 + id, Resolver: &resolver}
 	wg.Add(1)
 	go func(s *ssurb.Server) {
 		defer wg.Done()
@@ -110,9 +111,10 @@ func main() {
 	// official doc recommend 2112, so got it from there
 	go func() {
 		port := 2112 + id
+		ipString := helpers.GetIP()
 		http.Handle("/metrics", promhttp.Handler())
 		log.Printf("Launching Prometheus server on port %d", port)
-		http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+		http.ListenAndServe(fmt.Sprintf("%s:%d", ipString, port), nil)
 	}()
 
 	// wait forever and allow modules and communication to run concurrently

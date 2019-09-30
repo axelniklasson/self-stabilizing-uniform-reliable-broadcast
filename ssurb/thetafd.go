@@ -3,9 +3,16 @@ package ssurb
 import (
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus/promauto"
+
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/constants"
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/models"
+	"github.com/prometheus/client_golang/prometheus"
 )
+
+type thetaFdMetrics struct {
+	TrustedMessagesCount prometheus.Gauge
+}
 
 // ThetafdModule models a theta failure detector
 type ThetafdModule struct {
@@ -13,7 +20,8 @@ type ThetafdModule struct {
 	P        []int
 	Resolver IResolver
 
-	Vector []int
+	Vector  []int
+	Metrics *thetaFdMetrics
 }
 
 // Init initializes the thetafd module
@@ -21,17 +29,25 @@ func (m *ThetafdModule) Init() {
 	for i := 0; i < len(m.P); i++ {
 		m.Vector = append(m.Vector, 0)
 	}
+
+	m.Metrics = &thetaFdMetrics{
+		TrustedMessagesCount: promauto.NewGauge(prometheus.GaugeOpts{
+			Name: "theta_fd_trusted_count",
+			Help: "The total number of trusted processors",
+		}),
+	}
 }
 
 // Trusted returns the set of processor IDs that are below the threshold ThetafdW
 func (m *ThetafdModule) Trusted() []int {
 	trusted := []int{}
 	for idx, x := range m.Vector {
-		if x < constants.ThetafdW && idx != m.ID {
+		if x < constants.ThetafdW {
 			trusted = append(trusted, idx)
 		}
 	}
 
+	m.Metrics.TrustedMessagesCount.Set(float64(len(trusted)))
 	return trusted
 }
 

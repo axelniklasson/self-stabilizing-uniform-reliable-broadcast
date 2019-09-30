@@ -195,7 +195,6 @@ func TestTrimBuffer(t *testing.T) {
 	assert.Equal(t, len(mod.Buffer.Records), 2)
 	mod.trimBuffer()
 	assert.Equal(t, len(mod.Buffer.Records), 2)
-
 }
 
 func TestProcessMessages(t *testing.T) {

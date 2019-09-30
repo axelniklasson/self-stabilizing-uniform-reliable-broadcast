@@ -12,7 +12,7 @@ const TestHostFilePath = "./test_hosts.txt"
 const ModuleRunSleepDuration = 250 * time.Millisecond
 
 // ThetafdW is the threshold used by the theta fd
-const ThetafdW = 10
+const ThetafdW = 100
 
 // ServerBufferSize is the size of the server buffer used when reading messages over the UDP socket
 const ServerBufferSize = 1024
@@ -25,3 +25,9 @@ const TravisEnvVar = "TRAVIS_CI"
 
 // BufferUnitSize is used to control the number of messages allowed to be in the buffer for a processor
 const BufferUnitSize = 100
+
+// IPEnvVar is set to allow for the IP address to be used when binding API
+const IPEnvVar = "IP"
+
+// Env is used to control what env is currently launching the app
+const Env = "ENV"

@@ -56,13 +56,13 @@ func TestSend(t *testing.T) {
 	// finally check that it is possible to send message
 	addr := &net.UDPAddr{IP: IP, Port: PORT}
 	msg := models.Message{Type: models.MSG, Sender: 0, Data: map[string]interface{}{"foo": "bar"}}
-	err = send(addr, &msg)
+	err = send(addr, &msg, 1)
 	assert.NilError(t, err)
-	send(addr, &msg)
+	send(addr, &msg, 1)
 	assert.NilError(t, err)
-	send(addr, &msg)
+	send(addr, &msg, 1)
 	assert.NilError(t, err)
-	send(addr, &msg)
+	send(addr, &msg, 1)
 	assert.NilError(t, err)
 
 	messagesDelivered := false

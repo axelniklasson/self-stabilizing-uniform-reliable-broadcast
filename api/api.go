@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/helpers"
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/ssurb"
 
 	"github.com/gorilla/mux"
@@ -57,9 +58,12 @@ func launchClient(w http.ResponseWriter, r *http.Request) {
 
 	go func(reqCount int) {
 		mod := resolver.GetUrbModule()
+		log.Println("Launching client")
 
+		// TODO look into optimising this one
 		if reqCount != -1 {
 			for i := 0; i < reqCount; i++ {
+				mod.BlockUntilAvailableSpace()
 				mod.UrbBroadcast(&ssurb.UrbMessage{Text: fmt.Sprintf("Message %d_%d", mod.ID, i)})
 			}
 		}
@@ -76,8 +80,9 @@ func SetUp(id int, r *ssurb.Resolver) {
 	router.HandleFunc("/client/launch", launchClient).Methods("POST")
 	router.HandleFunc("/broadcast", broadcast).Methods("POST")
 
-	port := 5000 + id
+	port := 4000 + id
 	resolver = r
+	ipString := helpers.GetIP()
 	log.Printf("Launching API on port %d", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), router))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", ipString, port), router))
 }

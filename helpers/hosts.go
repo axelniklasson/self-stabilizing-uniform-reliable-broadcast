@@ -22,6 +22,18 @@ func getHostsPath() string {
 	return constants.HostsFilePath
 }
 
+// IPStringToSlice converts a string of the form X.X.X.X to an IP struct []byte
+func IPStringToSlice(ipString string) []byte {
+	parts := strings.Split(ipString, ".")
+	ip := []byte{}
+	for _, p := range parts {
+		x, _ := strconv.Atoi(p)
+		ip = append(ip, byte(x))
+	}
+
+	return ip
+}
+
 // ParseHostsFile parses a host file at the given path and returns a slice of corresponding processors
 func ParseHostsFile() ([]models.Processor, error) {
 	// parse file and exit if error
@@ -60,14 +72,7 @@ func ParseHostsFile() ([]models.Processor, error) {
 			ipString := strings.TrimSuffix(parts[2], "\n")
 
 			// build net.IP struct
-			parts = strings.Split(ipString, ".")
-
-			ip := []byte{}
-			for _, p := range parts {
-				x, _ := strconv.Atoi(p)
-				ip = append(ip, byte(x))
-			}
-
+			ip := IPStringToSlice(ipString)
 			p := models.Processor{ID: id, Hostname: hostname, IPString: ipString, IP: ip}
 			processors = append(processors, p)
 		}
@@ -81,3 +86,4 @@ func ParseHostsFile() ([]models.Processor, error) {
 	Processors = processors
 	return processors, nil
 }
+

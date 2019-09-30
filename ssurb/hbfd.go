@@ -31,9 +31,7 @@ func (m *HbfdModule) HB() []int {
 func (m *HbfdModule) DoForever() {
 	for {
 		for _, id := range m.P {
-			if id != m.ID {
-				m.sendHeartbeat(id)
-			}
+			m.sendHeartbeat(id)
 		}
 
 		time.Sleep(time.Second * 1)
@@ -48,5 +46,10 @@ func (m *HbfdModule) onHeartbeat(senderID int) {
 // sendHeartbeat sends a heartbeat to another processor to indicate that this processor is alive
 func (m *HbfdModule) sendHeartbeat(receiverID int) {
 	message := models.Message{Type: models.HBFDheartbeat, Sender: m.ID, Data: nil}
-	go SendToProcessor(receiverID, &message)
+
+	if receiverID == m.ID {
+		m.Hb[m.ID]++
+	} else {
+		go SendToProcessor(receiverID, &message)
+	}
 }

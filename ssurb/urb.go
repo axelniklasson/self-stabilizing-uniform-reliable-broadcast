@@ -23,8 +23,9 @@ type UrbMessage struct {
 
 type urbMetrics struct {
 	// General
-	DeliveredMessagesCount prometheus.Counter
-	DeliveredByteCount     prometheus.Counter
+	BroadcastedMessagesCount prometheus.Counter
+	DeliveredMessagesCount   prometheus.Counter
+	DeliveredByteCount       prometheus.Counter
 
 	// Throughput
 	MessageDeliveryTime prometheus.Gauge
@@ -60,6 +61,10 @@ func (m *UrbModule) Init() {
 
 	// init metrics
 	m.Metrics = &urbMetrics{
+		BroadcastedMessagesCount: promauto.NewCounter(prometheus.CounterOpts{
+			Name: "urb_broadcasted_messages_count",
+			Help: "The total number of broadcasted messages",
+		}),
 		DeliveredMessagesCount: promauto.NewCounter(prometheus.CounterOpts{
 			Name: "urb_delivered_messages_count",
 			Help: "The total number of delivered messages",
@@ -103,6 +108,13 @@ func (m *UrbModule) maxSeq(k int) int {
 	return max
 }
 
+// BlockUntilAvailableSpace busy-waits until flow control mechanism ensures enough space on all trusted receivers
+func (m *UrbModule) BlockUntilAvailableSpace() {
+	for m.Seq >= m.minTxObsS()+constants.BufferUnitSize {
+		time.Sleep(time.Millisecond * 5)
+	}
+}
+
 // minTxObsS returns the smallest obsolete sequence number that pi had received from a trusted receiver
 func (m *UrbModule) minTxObsS() int {
 	trusted := m.Resolver.Trusted()
@@ -111,6 +123,10 @@ func (m *UrbModule) minTxObsS() int {
 		if min == -1 || m.TxObsS[id] < min {
 			min = m.TxObsS[id]
 		}
+	}
+
+	if m.TxObsS[m.ID] < min {
+		min = m.TxObsS[m.ID]
 	}
 
 	return min
@@ -149,12 +165,12 @@ func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 	mux.Lock()
 
 	// busy-wait until flow control mechanism ensures enough space on all trusted receivers
-	for m.Seq >= m.minTxObsS()+constants.BufferUnitSize {
-		// release lock, sleep and grab it again before next check
-		mux.Unlock()
-		time.Sleep(time.Nanosecond * 10)
-		mux.Lock()
-	}
+	// for m.Seq >= m.minTxObsS()+constants.BufferUnitSize {
+	// 	// release lock, sleep and grab it again before next check
+	// 	mux.Unlock()
+	// 	time.Sleep(time.Millisecond * 20)
+	// 	mux.Lock()
+	// }
 
 	m.Seq++
 	m.update(msg, m.ID, m.Seq, m.ID)
@@ -165,12 +181,17 @@ func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 	ts := time.Now().UnixNano()
 	m.PendingMessages[msg] = ts
 
+	// emit metric that msg was broadcasted
+	m.Metrics.BroadcastedMessagesCount.Inc()
+
+	// log.Printf("broadcasted msg %v", msg)
+
 	// release lock
 	mux.Unlock()
 }
 
 // UrbDeliver delivers a message to the application layer
-func (m *UrbModule) UrbDeliver(msg *UrbMessage) {
+func (m *UrbModule) UrbDeliver(msg *UrbMessage, id int) {
 	if !helpers.IsUnitTesting() && m.Metrics != nil {
 		if t1, exists := m.PendingMessages[msg]; exists {
 			// TODO use NTP time
@@ -224,7 +245,6 @@ func (m *UrbModule) flushBufferIfStaleInfo() {
 	identifiers := map[Identifier]bool{}
 	flush := false
 
-	// go through all records
 	// lines 18-19
 	for _, r := range m.Buffer.Records {
 
@@ -312,6 +332,8 @@ func (m *UrbModule) trimBuffer() {
 		if r.Identifier.ID == m.ID {
 			if m.minTxObsS() < r.Identifier.Seq {
 				newBuffer.Add(r)
+			} else {
+				log.Printf("removed msg %v from buffer since minTxObs (%d) >= seq (%d)", r.Msg, m.minTxObsS(), r.Identifier.Seq)
 			}
 		} else {
 			k := r.Identifier.ID
@@ -330,7 +352,7 @@ func (m *UrbModule) processMessages() {
 	trusted := listToMap(m.Resolver.Trusted())
 	for _, r := range m.Buffer.Records {
 		if !r.Delivered && isSubset(trusted, r.RecBy) {
-			m.UrbDeliver(r.Msg)
+			m.UrbDeliver(r.Msg, r.Identifier.ID)
 		}
 		r.Delivered = r.Delivered || isSubset(trusted, r.RecBy)
 
@@ -347,9 +369,7 @@ func (m *UrbModule) processMessages() {
 // gossip sends control info about max seq that pi stores for pk as well as info about max obsolete record for pk
 func (m *UrbModule) gossip() {
 	for _, k := range m.P {
-		if k != m.ID {
-			m.sendGOSSIP(k, m.maxSeq(k), m.RxObsS[k], m.TxObsS[k])
-		}
+		m.sendGOSSIP(k, m.maxSeq(k), m.RxObsS[k], m.TxObsS[k])
 	}
 }
 
@@ -378,13 +398,18 @@ func (m *UrbModule) sendMSGack(receiverID int, j int, s int) {
 
 func (m *UrbModule) sendGOSSIP(receiverID int, seqJ int, txObsSJ int, rxObsSJ int) {
 	data := map[string]interface{}{
-		"seqJ":    seqJ,
-		"txObsSJ": txObsSJ,
-		"rxObsSJ": rxObsSJ,
+		"seqJ":    float64(seqJ),
+		"txObsSJ": float64(txObsSJ),
+		"rxObsSJ": float64(rxObsSJ),
 	}
 
 	message := models.Message{Type: models.GOSSIP, Sender: m.ID, Data: data}
-	go SendToProcessor(receiverID, &message)
+	if receiverID == m.ID {
+		// deliver directly if sending to self
+		go m.onGOSSIP(&message)
+	} else {
+		go SendToProcessor(receiverID, &message)
+	}
 }
 
 func (m *UrbModule) onMSG(msg *models.Message) {
