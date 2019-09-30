@@ -50,12 +50,11 @@ func TestMaxSeq(t *testing.T) {
 
 func TestMinTxObsS(t *testing.T) {
 	mod, resolver := bootstrap()
-	mod.TxObsS = []int{1, 2, 5, 10, 0, 50}
+	mod.TxObsS = []int{4, 2, 5, 10, 0, 50}
 	resolver.TrustedRet = []int{1, 3, 5}
 
 	// should return 2, since mod.TxObsS[1] is smallest value for x, x part of resolver.TrustedRet
-	// TODO fix me
-	// assert.Equal(t, mod.minTxObsS(), 2)
+	assert.Equal(t, mod.minTxObsS(), 2)
 }
 
 func TestUpdate(t *testing.T) {
