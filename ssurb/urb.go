@@ -159,16 +159,15 @@ func (m *UrbModule) update(msg *UrbMessage, j int, s int, k int) {
 // UrbBroadcast is called from the application layer to broadcast a message
 // NOTE call this in a separate goroutine
 func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
+
 	// grab lock
 	mux.Lock()
 
-	// busy-wait until flow control mechanism ensures enough space on all trusted receivers
-	// for m.Seq >= m.minTxObsS()+helpers.GetBufferUnitSize() {
-	// 	// release lock, sleep and grab it again before next check
-	// 	mux.Unlock()
-	// 	time.Sleep(time.Millisecond * 20)
-	// 	mux.Lock()
-	// }
+	for m.Seq >= m.minTxObsS()+helpers.GetBufferUnitSize() {
+		mux.Unlock()
+		time.Sleep(time.Microsecond * 100)
+		mux.Lock()
+	}
 
 	m.Seq++
 	m.update(msg, m.ID, m.Seq, m.ID)
@@ -179,13 +178,13 @@ func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 	ts := time.Now().UnixNano()
 	m.PendingMessages[msg] = ts
 
+	// release lock
+	mux.Unlock()
+
 	// emit metric that msg was broadcasted
 	m.Metrics.BroadcastedMessagesCount.Inc()
 
-	// log.Printf("broadcasted msg %v", msg)
-
-	// release lock
-	mux.Unlock()
+	log.Printf("broadcasted msg %v", msg)
 }
 
 // UrbDeliver delivers a message to the application layer
@@ -330,8 +329,6 @@ func (m *UrbModule) trimBuffer() {
 		if r.Identifier.ID == m.ID {
 			if m.minTxObsS() < r.Identifier.Seq {
 				newBuffer.Add(r)
-			} else {
-				log.Printf("removed msg %v from buffer since minTxObs (%d) >= seq (%d)", r.Msg, m.minTxObsS(), r.Identifier.Seq)
 			}
 		} else {
 			k := r.Identifier.ID

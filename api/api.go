@@ -61,11 +61,12 @@ func launchClient(w http.ResponseWriter, r *http.Request) {
 		log.Println("Launching client")
 
 		// TODO look into optimising this one
-		if reqCount != -1 {
-			for i := 0; i < reqCount; i++ {
-				mod.BlockUntilAvailableSpace()
-				mod.UrbBroadcast(&ssurb.UrbMessage{Text: fmt.Sprintf("Message %d_%d", mod.ID, i)})
-			}
+		for i := 0; i < reqCount; i++ {
+			// mod.BlockUntilAvailableSpace()
+			// if i%helpers.GetBufferUnitSize() == 0 {
+			// 	mod.BlockUntilAvailableSpace()
+			// }
+			go mod.UrbBroadcast(&ssurb.UrbMessage{Text: fmt.Sprintf("Message %d_%d", mod.ID, i)})
 		}
 	}(payload.ReqCount)
 
