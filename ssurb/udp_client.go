@@ -38,7 +38,7 @@ var metrics = &clientMetrics{
 	MsgCount: promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "udp_client_msg_count",
 		Help: "The amount messages sent by this client",
-	}, []string{"receiver_id"}),
+	}, []string{"receiver_id", "msg_type"}),
 }
 
 // SendToProcessor is a wrapper around send, intended to be called from modules
@@ -60,7 +60,7 @@ func SendToProcessor(receiverID int, msg *models.Message) {
 			log.Printf("Got error when sending %v to %d: %v, retrying..", msg, receiverID, err)
 			time.Sleep(time.Millisecond * 10)
 		} else {
-			metrics.MsgCount.WithLabelValues(strconv.Itoa(receiverID)).Inc()
+			metrics.MsgCount.WithLabelValues(strconv.Itoa(receiverID), msg.Type.String()).Inc()
 			sent = true
 		}
 	}

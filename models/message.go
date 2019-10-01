@@ -16,6 +16,23 @@ const (
 	THETAheartbeat MessageType = 4
 )
 
+func (m MessageType) String() string {
+	switch m {
+	case MSG:
+		return "MSG"
+	case MSGack:
+		return "MSGack"
+	case GOSSIP:
+		return "GOSSIP"
+	case HBFDheartbeat:
+		return "HBFDheartbeat"
+	case THETAheartbeat:
+		return "THETAheartbeat"
+	default:
+		return "UNRECOGNIZED"
+	}
+}
+
 // Message represents a message sent between two processors over UDP
 type Message struct {
 	Type   MessageType
