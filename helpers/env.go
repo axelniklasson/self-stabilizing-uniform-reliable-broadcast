@@ -1,7 +1,11 @@
 package helpers
 
 import (
+	"log"
+	"math/rand"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/constants"
 )
@@ -44,4 +48,35 @@ func IsDevEnv() bool {
 		return false
 	}
 	return val == "DEV"
+}
+
+// GetBufferUnitSize returns the env var buffer size if applicable, otherwise -1
+func GetBufferUnitSize() int {
+	val, isSet := os.LookupEnv(constants.BufferUnitSizeEnvVar)
+	if !isSet {
+		return constants.BufferUnitSize
+	}
+
+	x, err := strconv.Atoi(val)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return x
+}
+
+// GetModRunSleepDuration retuns the Duration to sleep for main module
+func GetModRunSleepDuration() time.Duration {
+	val, isSet := os.LookupEnv(constants.ModuleRunSleepEnvVar)
+	if !isSet {
+		return time.Duration(rand.Int31n(int32(constants.ModuleRunSleepMs))) * time.Millisecond
+	}
+
+	x, err := strconv.Atoi(val)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("overridden")
+
+	return time.Duration(rand.Int31n(int32(x))) * time.Millisecond
 }

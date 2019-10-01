@@ -10,8 +10,6 @@ import (
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/models"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-
-	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/constants"
 )
 
 var mux sync.Mutex
@@ -110,7 +108,7 @@ func (m *UrbModule) maxSeq(k int) int {
 
 // BlockUntilAvailableSpace busy-waits until flow control mechanism ensures enough space on all trusted receivers
 func (m *UrbModule) BlockUntilAvailableSpace() {
-	for m.Seq >= m.minTxObsS()+constants.BufferUnitSize {
+	for m.Seq >= m.minTxObsS()+helpers.GetBufferUnitSize() {
 		time.Sleep(time.Millisecond * 1)
 	}
 }
@@ -165,7 +163,7 @@ func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 	mux.Lock()
 
 	// busy-wait until flow control mechanism ensures enough space on all trusted receivers
-	// for m.Seq >= m.minTxObsS()+constants.BufferUnitSize {
+	// for m.Seq >= m.minTxObsS()+helpers.GetBufferUnitSize() {
 	// 	// release lock, sleep and grab it again before next check
 	// 	mux.Unlock()
 	// 	time.Sleep(time.Millisecond * 20)
@@ -236,7 +234,7 @@ func (m *UrbModule) DoForever() {
 		// release lock
 		mux.Unlock()
 
-		time.Sleep(constants.ModuleRunSleepDuration)
+		time.Sleep(helpers.GetModRunSleepDuration())
 	}
 }
 
@@ -289,11 +287,11 @@ func (m *UrbModule) checkTransmitWindow() {
 	}
 
 	// check if should allow this node to send bufferUnitSize messages without considering receivers
-	seqBound := mS <= m.Seq && m.Seq <= (mS+constants.BufferUnitSize)
+	seqBound := mS <= m.Seq && m.Seq <= (mS+helpers.GetBufferUnitSize())
 	subSet := isSubset(s, s2)
 	if !(seqBound && subSet) {
 		if !seqBound {
-			log.Printf("setting all values in TxObsS to %d due to m.seq not being between mS (%d) and mS+bufferUnitSize (%d)", m.Seq, mS, mS+constants.BufferUnitSize)
+			log.Printf("setting all values in TxObsS to %d due to m.seq not being between mS (%d) and mS+bufferUnitSize (%d)", m.Seq, mS, mS+helpers.GetBufferUnitSize())
 		} else if !subSet {
 			log.Printf("setting all values in TxObsS to %d due to seqnums ms+1..seq not in buffer", m.Seq)
 		}
@@ -308,7 +306,7 @@ func (m *UrbModule) checkTransmitWindow() {
 // is not larger than bufferUnitSize
 func (m *UrbModule) checkReceivingWindow() {
 	for _, k := range m.P {
-		m.RxObsS[k] = max(m.RxObsS[k], m.maxSeq(k)-constants.BufferUnitSize)
+		m.RxObsS[k] = max(m.RxObsS[k], m.maxSeq(k)-helpers.GetBufferUnitSize())
 	}
 }
 
@@ -338,7 +336,7 @@ func (m *UrbModule) trimBuffer() {
 		} else {
 			k := r.Identifier.ID
 			s := r.Identifier.Seq
-			if contains(m.P, k) && m.RxObsS[k] < s && m.maxSeq(k)-constants.BufferUnitSize <= s {
+			if contains(m.P, k) && m.RxObsS[k] < s && m.maxSeq(k)-helpers.GetBufferUnitSize() <= s {
 				newBuffer.Add(r)
 			}
 		}
