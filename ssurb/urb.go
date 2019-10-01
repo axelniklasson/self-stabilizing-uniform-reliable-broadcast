@@ -111,7 +111,7 @@ func (m *UrbModule) maxSeq(k int) int {
 // BlockUntilAvailableSpace busy-waits until flow control mechanism ensures enough space on all trusted receivers
 func (m *UrbModule) BlockUntilAvailableSpace() {
 	for m.Seq >= m.minTxObsS()+constants.BufferUnitSize {
-		time.Sleep(time.Millisecond * 5)
+		time.Sleep(time.Millisecond * 1)
 	}
 }
 
