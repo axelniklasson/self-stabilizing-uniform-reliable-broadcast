@@ -76,7 +76,5 @@ func GetModRunSleepDuration() time.Duration {
 		log.Fatal(err)
 	}
 
-	log.Printf("overridden")
-
 	return time.Duration(rand.Int31n(int32(x))) * time.Millisecond
 }

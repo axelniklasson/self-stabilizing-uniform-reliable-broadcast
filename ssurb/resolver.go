@@ -77,3 +77,9 @@ func (r *Resolver) GetUrbModule() *UrbModule {
 	urbModule := r.Modules[URB].(*UrbModule)
 	return urbModule
 }
+
+// GetUrbData is called by the API to return data to clients
+func (r *Resolver) GetUrbData() map[string]interface{} {
+	urbModule := r.Modules[URB].(*UrbModule)
+	return urbModule.GetData()
+}

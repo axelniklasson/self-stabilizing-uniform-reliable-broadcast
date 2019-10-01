@@ -30,7 +30,11 @@ type launchClientPayload struct {
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
-	res := response{Endpoint: "/", StatusCode: 200, Data: map[string]interface{}{"foo": "bar", "trusted": resolver.Trusted()}}
+	res := response{Endpoint: "/", StatusCode: 200, Data: map[string]interface{}{
+		"trusted": resolver.Trusted(),
+		"hb":      resolver.Hb(),
+		"urb":     resolver.GetUrbData(),
+	}}
 	json.NewEncoder(w).Encode(res)
 }
 
@@ -60,12 +64,7 @@ func launchClient(w http.ResponseWriter, r *http.Request) {
 		mod := resolver.GetUrbModule()
 		log.Println("Launching client")
 
-		// TODO look into optimising this one
 		for i := 0; i < reqCount; i++ {
-			// mod.BlockUntilAvailableSpace()
-			// if i%helpers.GetBufferUnitSize() == 0 {
-			// 	mod.BlockUntilAvailableSpace()
-			// }
 			go mod.UrbBroadcast(&ssurb.UrbMessage{Text: fmt.Sprintf("Message %d_%d", mod.ID, i)})
 		}
 	}(payload.ReqCount)

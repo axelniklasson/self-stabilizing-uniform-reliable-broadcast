@@ -455,3 +455,13 @@ func (m *UrbModule) hasObsoleteRecord() *BufferRecord {
 
 	return nil
 }
+
+// GetData returns a dict with urb mod data
+func (m *UrbModule) GetData() map[string]interface{} {
+	return map[string]interface{}{
+		"seq":           m.Seq,
+		"bufferRecords": m.Buffer.Records,
+		"rxObsS":        m.RxObsS,
+		"txObsS":        m.TxObsS,
+	}
+}
