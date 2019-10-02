@@ -23,6 +23,7 @@ type UrbMessage struct {
 type urbMetrics struct {
 	BroadcastedMessagesCount prometheus.Counter
 	MessageLatencyHistogram  prometheus.Histogram
+	ThroughputGauge          prometheus.Gauge
 }
 
 // UrbModule models the URB algorithm in the paper
@@ -63,16 +64,18 @@ func (m *UrbModule) Init() {
 				Name: "urb_broadcasted_messages_count",
 				Help: "The total number of broadcasted messages",
 			}),
-			MessageLatencyHistogram: prometheus.NewHistogram(
-				prometheus.HistogramOpts{
-					Name:    "urb_message_latency",
-					Help:    "Message latency (ms)",
-					Buckets: []float64{50, 100, 250, 500, 1000, 10000},
-				},
-			),
+			MessageLatencyHistogram: prometheus.NewHistogram(prometheus.HistogramOpts{
+				Name:    "urb_message_latency",
+				Help:    "Message latency (ms)",
+				Buckets: []float64{50, 100, 250, 500, 1000, 10000},
+			}),
+			ThroughputGauge: prometheus.NewGauge(prometheus.GaugeOpts{
+				Name: "urb_message_throughput",
+				Help: "Message throughput (msgs/s)",
+			}),
 		}
 
-		prometheus.MustRegister(m.Metrics.MessageLatencyHistogram)
+		prometheus.MustRegister(m.Metrics.MessageLatencyHistogram, m.Metrics.ThroughputGauge)
 	}
 }
 
@@ -139,6 +142,10 @@ func (m *UrbModule) update(msg *UrbMessage, j int, s int, k int) {
 
 	// add record to buffer if new id and message is not nil
 	if r == nil && msg != nil {
+		if len(m.Buffer.Records) == 0 && m.MsgCount == 0 {
+			m.StartTime = time.Now()
+		}
+
 		recBy := map[int]bool{j: true, k: true}
 		prevHB := []int{}
 		for i := 0; i < len(m.P); i++ {
@@ -164,12 +171,6 @@ func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 		mux.Unlock()
 		time.Sleep(time.Microsecond * 100)
 		mux.Lock()
-	}
-
-	// store timestamp for first msg broadcasted to be able to calculate throughput
-	if m.Seq == 0 {
-		log.Println("huehue")
-		m.StartTime = time.Now()
 	}
 
 	m.Seq++
@@ -200,6 +201,9 @@ func (m *UrbModule) UrbDeliver(msg *UrbMessage, id int) {
 			if id == m.ID && m.MsgCount%constants.TimeDelInterval == 0 {
 				log.Printf("Delivered %d msgs in %f seconds", m.MsgCount, time.Now().Sub(m.StartTime).Seconds())
 			}
+
+			throughput := float64(m.MsgCount) / (time.Now().Sub(m.StartTime).Seconds())
+			m.Metrics.ThroughputGauge.Set(throughput)
 		} else {
 			log.Fatal("tried to deliver unrecognized message")
 		}
