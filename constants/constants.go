@@ -35,3 +35,6 @@ const BufferUnitSizeEnvVar = "BUFFER_SIZE"
 
 // ModuleRunSleepEnvVar is used to set module run sleep at runtime (ms)
 const ModuleRunSleepEnvVar = "MOD_RUN_SLEEP"
+
+// TimeDelInterval is used to decide what xth time a message is delivered it should print to console
+const TimeDelInterval = 5000

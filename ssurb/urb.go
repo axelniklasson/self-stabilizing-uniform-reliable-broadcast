@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/constants"
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/helpers"
 
 	"github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast/models"
@@ -21,7 +22,7 @@ type UrbMessage struct {
 
 type urbMetrics struct {
 	BroadcastedMessagesCount prometheus.Counter
-	MessageLatency           prometheus.Histogram
+	MessageLatencyHistogram  prometheus.Histogram
 }
 
 // UrbModule models the URB algorithm in the paper
@@ -36,6 +37,8 @@ type UrbModule struct {
 	TxObsS []int
 
 	// Metrics stuff
+	StartTime       time.Time
+	MsgCount        int
 	Metrics         *urbMetrics
 	PendingMessages map[*UrbMessage]time.Time
 }
@@ -60,7 +63,7 @@ func (m *UrbModule) Init() {
 				Name: "urb_broadcasted_messages_count",
 				Help: "The total number of broadcasted messages",
 			}),
-			MessageLatency: prometheus.NewHistogram(
+			MessageLatencyHistogram: prometheus.NewHistogram(
 				prometheus.HistogramOpts{
 					Name:    "urb_message_latency",
 					Help:    "Message latency (ms)",
@@ -69,7 +72,7 @@ func (m *UrbModule) Init() {
 			),
 		}
 
-		prometheus.MustRegister(m.Metrics.MessageLatency)
+		prometheus.MustRegister(m.Metrics.MessageLatencyHistogram)
 	}
 }
 
@@ -163,6 +166,12 @@ func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 		mux.Lock()
 	}
 
+	// store timestamp for first msg broadcasted to be able to calculate throughput
+	if m.Seq == 0 {
+		log.Println("huehue")
+		m.StartTime = time.Now()
+	}
+
 	m.Seq++
 	m.update(msg, m.ID, m.Seq, m.ID)
 
@@ -185,7 +194,12 @@ func (m *UrbModule) UrbDeliver(msg *UrbMessage, id int) {
 		if t1, exists := m.PendingMessages[msg]; exists {
 			// TODO use NTP time
 			latency := time.Now().Sub(t1)
-			m.Metrics.MessageLatency.Observe(float64(latency.Milliseconds()))
+			m.Metrics.MessageLatencyHistogram.Observe(float64(latency.Milliseconds()))
+			m.MsgCount++
+
+			if id == m.ID && m.MsgCount%constants.TimeDelInterval == 0 {
+				log.Printf("Delivered %d msgs in %f seconds", m.MsgCount, time.Now().Sub(m.StartTime).Seconds())
+			}
 		} else {
 			log.Fatal("tried to deliver unrecognized message")
 		}
