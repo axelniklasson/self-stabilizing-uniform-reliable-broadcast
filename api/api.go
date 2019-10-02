@@ -62,7 +62,7 @@ func launchClient(w http.ResponseWriter, r *http.Request) {
 
 	go func(reqCount int) {
 		mod := resolver.GetUrbModule()
-		log.Println("Launching client")
+		log.Printf("Launching emulated client that will inject %d requests", reqCount)
 
 		for i := 0; i < reqCount; i++ {
 			go mod.UrbBroadcast(&ssurb.UrbMessage{Text: fmt.Sprintf("Message %d_%d", mod.ID, i)})

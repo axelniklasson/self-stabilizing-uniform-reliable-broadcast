@@ -26,7 +26,7 @@ type urbMetrics struct {
 	DeliveredByteCount       prometheus.Counter
 
 	// Throughput
-	MessageDeliveryTime prometheus.Gauge
+	MessageLatency prometheus.Histogram
 }
 
 // UrbModule models the URB algorithm in the paper
@@ -42,7 +42,7 @@ type UrbModule struct {
 
 	// Metrics stuff
 	Metrics         *urbMetrics
-	PendingMessages map[*UrbMessage]int64
+	PendingMessages map[*UrbMessage]time.Time
 }
 
 // Init initializes the urb module
@@ -71,12 +71,16 @@ func (m *UrbModule) Init() {
 			Name: "urb_delivered_bytes_count",
 			Help: "The total number of delivered bytes",
 		}),
-		MessageDeliveryTime: promauto.NewGauge(prometheus.GaugeOpts{
-			Name: "urb_message_delivery_time",
-			Help: "Total time taken from broadcast to delivery of a message (throughput)",
-		}),
+		MessageLatency: prometheus.NewHistogram(
+			prometheus.HistogramOpts{
+				Name:    "urb_message_latency",
+				Help:    "Message latency (ms)",
+				Buckets: []float64{50, 100, 250, 500, 1000, 10000},
+			},
+		),
 	}
-	m.PendingMessages = map[*UrbMessage]int64{}
+	m.PendingMessages = map[*UrbMessage]time.Time{}
+	prometheus.MustRegister(m.Metrics.MessageLatency)
 }
 
 // obsolete is used to determine what records in the buffer are considered to be obsolete
@@ -175,16 +179,14 @@ func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 	// TODO use NTP time
 	// ts := helpers.GetNTPTime().UnixNano()
 
-	ts := time.Now().UnixNano()
-	m.PendingMessages[msg] = ts
+	// ts := time.Now().UnixNano()
+	m.PendingMessages[msg] = time.Now()
 
 	// release lock
 	mux.Unlock()
 
 	// emit metric that msg was broadcasted
 	m.Metrics.BroadcastedMessagesCount.Inc()
-
-	log.Printf("broadcasted msg %v", msg)
 }
 
 // UrbDeliver delivers a message to the application layer
@@ -192,10 +194,8 @@ func (m *UrbModule) UrbDeliver(msg *UrbMessage, id int) {
 	if !helpers.IsUnitTesting() && m.Metrics != nil {
 		if t1, exists := m.PendingMessages[msg]; exists {
 			// TODO use NTP time
-			// t2 := helpers.GetNTPTime().UnixNano()
-			t2 := time.Now().UnixNano()
-			deliveryTime := t2 - t1
-			m.Metrics.MessageDeliveryTime.Set(float64(deliveryTime))
+			latency := time.Now().Sub(t1)
+			m.Metrics.MessageLatency.Observe(float64(latency.Milliseconds()))
 		}
 
 		m.Metrics.DeliveredMessagesCount.Inc()

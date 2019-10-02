@@ -7,4 +7,4 @@ if [ $# -lt 2 ]; then
     exit 2
 fi
 
-plcli --skip-healthcheck --node-count $1 --git-branch $2 --shuffle-nodes --app-path \$HOME/go/src/github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast --prometheus-sd-path ./heimdall/prometheus/sd.json --node-exporter $3 deploy https://github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast.git
+plcli --node-count $1 --git-branch $2 --shuffle-nodes --app-path \$HOME/go/src/github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast --prometheus-sd-path ./heimdall/prometheus/sd.json --node-exporter $3 deploy https://github.com/axelniklasson/self-stabilizing-uniform-reliable-broadcast.git
