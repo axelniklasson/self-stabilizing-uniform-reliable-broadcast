@@ -20,13 +20,8 @@ type UrbMessage struct {
 }
 
 type urbMetrics struct {
-	// General
 	BroadcastedMessagesCount prometheus.Counter
-	DeliveredMessagesCount   prometheus.Counter
-	DeliveredByteCount       prometheus.Counter
-
-	// Throughput
-	MessageLatency prometheus.Histogram
+	MessageLatency           prometheus.Histogram
 }
 
 // UrbModule models the URB algorithm in the paper
@@ -57,30 +52,25 @@ func (m *UrbModule) Init() {
 		m.TxObsS = append(m.TxObsS, -1)
 	}
 
-	// init metrics
-	m.Metrics = &urbMetrics{
-		BroadcastedMessagesCount: promauto.NewCounter(prometheus.CounterOpts{
-			Name: "urb_broadcasted_messages_count",
-			Help: "The total number of broadcasted messages",
-		}),
-		DeliveredMessagesCount: promauto.NewCounter(prometheus.CounterOpts{
-			Name: "urb_delivered_messages_count",
-			Help: "The total number of delivered messages",
-		}),
-		DeliveredByteCount: promauto.NewCounter(prometheus.CounterOpts{
-			Name: "urb_delivered_bytes_count",
-			Help: "The total number of delivered bytes",
-		}),
-		MessageLatency: prometheus.NewHistogram(
-			prometheus.HistogramOpts{
-				Name:    "urb_message_latency",
-				Help:    "Message latency (ms)",
-				Buckets: []float64{50, 100, 250, 500, 1000, 10000},
-			},
-		),
-	}
 	m.PendingMessages = map[*UrbMessage]time.Time{}
-	prometheus.MustRegister(m.Metrics.MessageLatency)
+	if !helpers.IsUnitTesting() {
+		// init metrics
+		m.Metrics = &urbMetrics{
+			BroadcastedMessagesCount: promauto.NewCounter(prometheus.CounterOpts{
+				Name: "urb_broadcasted_messages_count",
+				Help: "The total number of broadcasted messages",
+			}),
+			MessageLatency: prometheus.NewHistogram(
+				prometheus.HistogramOpts{
+					Name:    "urb_message_latency",
+					Help:    "Message latency (ms)",
+					Buckets: []float64{50, 100, 250, 500, 1000, 10000},
+				},
+			),
+		}
+
+		prometheus.MustRegister(m.Metrics.MessageLatency)
+	}
 }
 
 // obsolete is used to determine what records in the buffer are considered to be obsolete
@@ -113,7 +103,7 @@ func (m *UrbModule) maxSeq(k int) int {
 // BlockUntilAvailableSpace busy-waits until flow control mechanism ensures enough space on all trusted receivers
 func (m *UrbModule) BlockUntilAvailableSpace() {
 	for m.Seq >= m.minTxObsS()+helpers.GetBufferUnitSize() {
-		time.Sleep(time.Millisecond * 1)
+		time.Sleep(time.Microsecond * 500)
 	}
 }
 
@@ -154,6 +144,7 @@ func (m *UrbModule) update(msg *UrbMessage, j int, s int, k int) {
 
 		newRecord := &BufferRecord{Msg: msg, Identifier: id, Delivered: false, RecBy: recBy, PrevHB: prevHB}
 		m.Buffer.Add(newRecord)
+		m.PendingMessages[msg] = time.Now()
 	} else if r != nil {
 		r.RecBy[j] = true
 		r.RecBy[k] = true
@@ -161,7 +152,6 @@ func (m *UrbModule) update(msg *UrbMessage, j int, s int, k int) {
 }
 
 // UrbBroadcast is called from the application layer to broadcast a message
-// NOTE call this in a separate goroutine
 func (m *UrbModule) UrbBroadcast(msg *UrbMessage) {
 
 	// grab lock
@@ -196,10 +186,9 @@ func (m *UrbModule) UrbDeliver(msg *UrbMessage, id int) {
 			// TODO use NTP time
 			latency := time.Now().Sub(t1)
 			m.Metrics.MessageLatency.Observe(float64(latency.Milliseconds()))
+		} else {
+			log.Fatal("tried to deliver unrecognized message")
 		}
-
-		m.Metrics.DeliveredMessagesCount.Inc()
-		m.Metrics.DeliveredByteCount.Add(float64(len(msg.Text)))
 	}
 }
 

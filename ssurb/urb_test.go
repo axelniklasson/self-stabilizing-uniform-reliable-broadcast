@@ -35,6 +35,7 @@ func bootstrap() (*UrbModule, *MockResolver) {
 	}
 	r := MockResolver{Modules: make(map[ModuleType]interface{})}
 	urbModule := UrbModule{ID: 0, P: P, Resolver: &r, Seq: seq, Buffer: &buffer, RxObsS: rxObsS, TxObsS: txObsS}
+	urbModule.Init()
 	thetaModule := ThetafdModule{ID: 0, P: P, Resolver: &r, Vector: zeroedSlice}
 	hbfdModule := HbfdModule{ID: 0, P: P, Resolver: &r, Hb: zeroedSlice}
 
