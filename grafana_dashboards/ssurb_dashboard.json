@@ -16,6 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
+  "iteration": 1570102718481,
   "links": [],
   "panels": [
     {
@@ -26,287 +27,109 @@
         "x": 0,
         "y": 0
       },
-      "id": 36,
-      "panels": [],
-      "title": "Communication",
-      "type": "row"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "fill": 1,
-      "gridPos": {
-        "h": 10,
-        "w": 7,
-        "x": 0,
-        "y": 1
-      },
-      "id": 32,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(udp_client_msg_count)",
-          "format": "time_series",
-          "hide": false,
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "Sent messages",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(udp_server_msg_count)",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "Received messages",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Sent/received messages",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "fill": 1,
-      "gridPos": {
-        "h": 10,
-        "w": 7,
-        "x": 7,
-        "y": 1
-      },
-      "id": 33,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(udp_server_msg_count) by (instance)",
-          "format": "time_series",
-          "hide": false,
-          "intervalFactor": 1,
-          "legendFormat": "{{instance}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Servers",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "description": "",
-      "fill": 1,
-      "gridPos": {
-        "h": 10,
-        "w": 7,
-        "x": 14,
-        "y": 1
-      },
-      "id": 34,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(udp_client_msg_count) by (instance)",
-          "format": "time_series",
-          "hide": false,
-          "intervalFactor": 1,
-          "legendFormat": "{{instance}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Clients",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 11
-      },
       "id": 9,
       "panels": [],
       "title": "Stats",
       "type": "row"
+    },
+    {
+      "columns": [],
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "id": 41,
+      "links": [],
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 0,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "mappingType": 1,
+          "pattern": "/^(Time|env|job|__name__)$/",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "Node",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "decimals": 2,
+          "link": false,
+          "mappingType": 1,
+          "pattern": "/^(instance)$/",
+          "preserveFormat": false,
+          "sanitize": false,
+          "thresholds": [],
+          "type": "string",
+          "unit": "short",
+          "valueMaps": []
+        },
+        {
+          "alias": "Online",
+          "colorMode": "value",
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "#bf1b00",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "/^Value$/",
+          "thresholds": [
+            "0",
+            "1"
+          ],
+          "type": "string",
+          "unit": "short",
+          "valueMaps": [
+            {
+              "text": "Yes",
+              "value": "1"
+            },
+            {
+              "text": "No",
+              "value": "0"
+            }
+          ]
+        }
+      ],
+      "targets": [
+        {
+          "expr": "up{job=\"self-stabilizing-urb\"}",
+          "format": "table",
+          "instant": true,
+          "intervalFactor": 1,
+          "refId": "A"
+        }
+      ],
+      "title": "Processors",
+      "transform": "table",
+      "transparent": false,
+      "type": "table"
     },
     {
       "cacheTimeout": null,
@@ -326,10 +149,10 @@
         "thresholdMarkers": true
       },
       "gridPos": {
-        "h": 4,
+        "h": 7,
         "w": 3,
-        "x": 0,
-        "y": 12
+        "x": 6,
+        "y": 1
       },
       "id": 4,
       "interval": null,
@@ -368,7 +191,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "count(up{job=\"self-stabilizing-urb\"} == 1)",
+          "expr": "count(up{job=\"self-stabilizing-urb\", env=\"$env\"} == 1)",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -406,10 +229,10 @@
         "thresholdMarkers": true
       },
       "gridPos": {
-        "h": 4,
+        "h": 7,
         "w": 3,
-        "x": 3,
-        "y": 12
+        "x": 9,
+        "y": 1
       },
       "id": 18,
       "interval": null,
@@ -448,7 +271,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(urb_broadcasted_messages_count and up{job=\"self-stabilizing-urb\"})",
+          "expr": "sum(urb_broadcasted_messages_count{env=\"$env\"} and up{job=\"self-stabilizing-urb\", env=\"$env\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -485,10 +308,10 @@
         "thresholdMarkers": true
       },
       "gridPos": {
-        "h": 4,
+        "h": 7,
         "w": 3,
-        "x": 6,
-        "y": 12
+        "x": 12,
+        "y": 1
       },
       "id": 19,
       "interval": null,
@@ -527,14 +350,14 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(urb_broadcasted_messages_count and up{job=\"self-stabilizing-urb\"}) - min(urb_delivered_messages_count and up{job=\"self-stabilizing-urb\"})",
+          "expr": "sum(urb_broadcasted_messages_count{env=\"$env\"}) - min(urb_message_latency_count{env=\"$env\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
         }
       ],
       "thresholds": "1,2",
-      "title": "# lost msgs",
+      "title": "# missing msgs",
       "transparent": false,
       "type": "singlestat",
       "valueFontSize": "80%",
@@ -566,10 +389,10 @@
         "thresholdMarkers": true
       },
       "gridPos": {
-        "h": 4,
+        "h": 7,
         "w": 3,
-        "x": 9,
-        "y": 12
+        "x": 15,
+        "y": 1
       },
       "id": 20,
       "interval": null,
@@ -608,7 +431,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "count(up{job=\"self-stabilizing-urb\"}) - (count((urb_delivered_messages_count and up{job=\"self-stabilizing-urb\"}) == scalar(sum((urb_broadcasted_messages_count and up{job=\"self-stabilizing-urb\"})))) OR vector(0))",
+          "expr": "count(urb_message_latency_count{env=\"$env\"} < scalar(max(urb_broadcasted_messages_count{env=\"$env\"}))) OR vector(0)",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -649,10 +472,10 @@
         "thresholdMarkers": true
       },
       "gridPos": {
-        "h": 4,
+        "h": 7,
         "w": 3,
-        "x": 12,
-        "y": 12
+        "x": 18,
+        "y": 1
       },
       "id": 26,
       "interval": null,
@@ -701,7 +524,7 @@
         }
       ],
       "thresholds": "1,2",
-      "title": "# fatal errors",
+      "title": "# dropped \"packets\"",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -719,7 +542,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 8
       },
       "id": 13,
       "panels": [],
@@ -737,7 +560,7 @@
         "h": 10,
         "w": 7,
         "x": 0,
-        "y": 17
+        "y": 9
       },
       "id": 15,
       "legend": {
@@ -823,7 +646,7 @@
         "h": 10,
         "w": 7,
         "x": 7,
-        "y": 17
+        "y": 9
       },
       "id": 37,
       "legend": {
@@ -849,7 +672,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(urb_delivered_messages_count[30s])",
+          "expr": "urb_message_throughput{env=\"$env\"} and up{job=\"self-stabilizing-urb\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -908,7 +731,7 @@
         "h": 10,
         "w": 7,
         "x": 14,
-        "y": 17
+        "y": 9
       },
       "id": 11,
       "legend": {
@@ -928,13 +751,19 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "seriesOverrides": [],
+      "seriesOverrides": [
+        {
+          "alias": "Average",
+          "bars": false,
+          "linewidth": 10
+        }
+      ],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
       "targets": [
         {
-          "expr": "urb_message_delivery_time",
+          "expr": "((urb_message_latency_sum{env=\"$env\"} and up{job=\"self-stabilizing-urb\"}) > 0) / (urb_message_latency_count{env=\"$env\"} and up{job=\"self-stabilizing-urb\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -962,7 +791,7 @@
       },
       "yaxes": [
         {
-          "format": "ns",
+          "format": "ms",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -993,7 +822,7 @@
         "h": 10,
         "w": 7,
         "x": 0,
-        "y": 27
+        "y": 19
       },
       "id": 38,
       "legend": {
@@ -1074,11 +903,11 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 37
+        "y": 29
       },
-      "id": 28,
+      "id": 36,
       "panels": [],
-      "title": "Failure detectors",
+      "title": "Communication",
       "type": "row"
     },
     {
@@ -1088,12 +917,12 @@
       "dashes": false,
       "fill": 1,
       "gridPos": {
-        "h": 8,
-        "w": 6,
+        "h": 10,
+        "w": 7,
         "x": 0,
-        "y": 38
+        "y": 30
       },
-      "id": 30,
+      "id": 32,
       "legend": {
         "avg": false,
         "current": false,
@@ -1117,10 +946,12 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "theta_fd_trusted_count",
+          "expr": "sum(udp_client_msg_count) by (msg_type)",
           "format": "time_series",
+          "hide": false,
+          "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{msg_type}}",
           "refId": "A"
         }
       ],
@@ -1128,13 +959,12 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Trusted processors - theta fd",
+      "title": "Sent messages by type",
       "tooltip": {
         "shared": true,
         "sort": 0,
         "value_type": "individual"
       },
-      "transparent": true,
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -1149,7 +979,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": "0",
+          "min": null,
           "show": true
         },
         {
@@ -1167,31 +997,18 @@
       }
     },
     {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 46
-      },
-      "id": 22,
-      "panels": [],
-      "title": "Errors",
-      "type": "row"
-    },
-    {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
       "fill": 1,
       "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 0,
-        "y": 47
+        "h": 10,
+        "w": 7,
+        "x": 7,
+        "y": 30
       },
-      "id": 24,
+      "id": 39,
       "legend": {
         "avg": false,
         "current": false,
@@ -1215,17 +1032,19 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(udp_server_error_count) by (error_type)",
+          "expr": "sum(udp_client_msg_count)",
           "format": "time_series",
+          "hide": false,
+          "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "server_{{error_type}}",
+          "legendFormat": "Sent messages",
           "refId": "A"
         },
         {
-          "expr": "sum(udp_client_error_count) by (error_type)",
+          "expr": "sum(udp_server_msg_count)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "client_{{error_type}}",
+          "legendFormat": "Received messages",
           "refId": "B"
         }
       ],
@@ -1233,13 +1052,98 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Error types",
+      "title": "Sent/received messages",
       "tooltip": {
         "shared": true,
         "sort": 0,
         "value_type": "individual"
       },
-      "transparent": true,
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "description": "",
+      "fill": 1,
+      "gridPos": {
+        "h": 10,
+        "w": 7,
+        "x": 14,
+        "y": 30
+      },
+      "id": 34,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(udp_client_msg_count) by (instance)",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{instance}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Clients",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -1278,12 +1182,12 @@
       "dashes": false,
       "fill": 1,
       "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 47
+        "h": 10,
+        "w": 7,
+        "x": 0,
+        "y": 40
       },
-      "id": 25,
+      "id": 33,
       "legend": {
         "avg": false,
         "current": false,
@@ -1307,8 +1211,9 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(udp_client_error_count) by (instance)",
+          "expr": "sum(udp_server_msg_count) by (instance)",
           "format": "time_series",
+          "hide": false,
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
           "refId": "A"
@@ -1318,13 +1223,12 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Errors by processor",
+      "title": "Servers",
       "tooltip": {
         "shared": true,
         "sort": 0,
         "value_type": "individual"
       },
-      "transparent": true,
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -1357,12 +1261,302 @@
       }
     },
     {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 50
+      },
+      "id": 28,
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "fill": 1,
+          "gridPos": {
+            "h": 8,
+            "w": 6,
+            "x": 0,
+            "y": 51
+          },
+          "id": 30,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "theta_fd_trusted_count",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "{{instance}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Trusted processors - theta fd",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "transparent": true,
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        }
+      ],
+      "title": "Failure detectors",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 51
+      },
+      "id": 22,
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "fill": 1,
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 0,
+            "y": 52
+          },
+          "id": 24,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(udp_server_error_count) by (error_type)",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "server_{{error_type}}",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(udp_client_error_count) by (error_type)",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "client_{{error_type}}",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Error types",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "transparent": true,
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "fill": 1,
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 8,
+            "y": 52
+          },
+          "id": 25,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(udp_client_error_count) by (instance)",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "{{instance}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Errors by processor",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "transparent": true,
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        }
+      ],
+      "title": "Errors",
+      "type": "row"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 55
+        "y": 52
       },
       "id": 7,
       "panels": [],
@@ -1379,7 +1573,7 @@
         "h": 9,
         "w": 5,
         "x": 0,
-        "y": 56
+        "y": 53
       },
       "id": 2,
       "legend": {
@@ -1405,21 +1599,21 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg (urb_delivered_messages_count)",
+          "expr": "avg (urb_message_latency_count)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "count",
           "refId": "A"
         },
         {
-          "expr": "max (urb_delivered_messages_count)",
+          "expr": "max (urb_message_latency_count)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "max",
           "refId": "B"
         },
         {
-          "expr": "min (urb_delivered_messages_count)",
+          "expr": "min (urb_message_latency_count)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "min",
@@ -1478,7 +1672,7 @@
         "h": 9,
         "w": 5,
         "x": 5,
-        "y": 56
+        "y": 53
       },
       "id": 5,
       "legend": {
@@ -1504,7 +1698,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "urb_delivered_messages_count",
+          "expr": "urb_message_latency_count",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -1559,7 +1753,36 @@
   "style": "dark",
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "tags": [],
+          "text": "planetlab",
+          "value": "planetlab"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Environment",
+        "multi": false,
+        "name": "env",
+        "options": [
+          {
+            "selected": false,
+            "text": "local",
+            "value": "local"
+          },
+          {
+            "selected": true,
+            "text": "planetlab",
+            "value": "planetlab"
+          }
+        ],
+        "query": "local,planetlab",
+        "skipUrlSync": false,
+        "type": "custom"
+      }
+    ]
   },
   "time": {
     "from": "now-5m",
@@ -1593,5 +1816,5 @@
   "timezone": "",
   "title": "Self-stabilizing URB",
   "uid": "Y_3Pk1tWz",
-  "version": 53
+  "version": 71
 }
